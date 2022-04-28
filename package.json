@@ -1,5 +1,5 @@
 {
-  "name": "anya-s3-storage",
+  "name": "anya-s3-file-manager",
   "version": "0.1.0",
   "description": "An AWS S3 file manager.",
   "main": "index.js",
