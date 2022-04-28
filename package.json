@@ -1,0 +1,29 @@
+{
+  "name": "anya-s3-storage",
+  "version": "0.1.0",
+  "description": "An AWS S3 file manager.",
+  "main": "index.js",
+  "scripts": {
+    "changelog": "node_modules/conventional-changelog-cli/cli.js -n node_modules/@kelp404/changelog.config",
+    "ncu": "node_modules/.bin/npm-check-updates",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kelp404/anya-s3-storage.git"
+  },
+  "author": "Kelp <kelp@phate.org>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kelp404/anya-s3-storage/issues"
+  },
+  "homepage": "https://github.com/kelp404/anya-s3-storage#readme",
+  "dependencies": {
+    "express": "4.18.0"
+  },
+  "devDependencies": {
+    "@kelp404/changelog.config": "0.1.0",
+    "conventional-changelog-cli": "2.2.2",
+    "npm-check-updates": "12.5.9"
+  }
+}
