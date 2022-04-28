@@ -4,6 +4,7 @@
   "description": "An AWS S3 file manager.",
   "main": "index.js",
   "scripts": {
+    "eslint": "node_modules/eslint/bin/eslint.js ./ --ignore-path .gitignore",
     "changelog": "node_modules/conventional-changelog-cli/cli.js -n node_modules/@kelp404/changelog.config",
     "ncu": "node_modules/.bin/npm-check-updates",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,11 +20,23 @@
   },
   "homepage": "https://github.com/kelp404/anya-s3-storage#readme",
   "dependencies": {
+    "config": "3.3.7",
     "express": "4.18.0"
   },
   "devDependencies": {
+    "@babel/core": "7.17.9",
+    "@babel/eslint-parser": "7.17.0",
+    "@babel/plugin-proposal-class-properties": "7.16.7",
+    "@babel/preset-env": "7.16.11",
+    "@babel/preset-react": "7.16.7",
     "@kelp404/changelog.config": "0.1.0",
     "conventional-changelog-cli": "2.2.2",
+    "eslint": "8.14.0",
+    "eslint-config-xo": "0.40.0",
+    "eslint-config-xo-react": "0.27.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-react": "7.29.4",
+    "eslint-plugin-react-hooks": "4.5.0",
     "npm-check-updates": "12.5.9"
   }
 }
