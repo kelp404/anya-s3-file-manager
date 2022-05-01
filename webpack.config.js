@@ -73,18 +73,6 @@ module.exports = () => {
 				},
 			],
 		},
-		optimization: {
-			splitChunks: {
-				chunks: 'initial',
-				minSize: 16000,
-				maxSize: 0,
-				minChunks: 1,
-				maxAsyncRequests: 1,
-				maxInitialRequests: 1,
-				automaticNameDelimiter: '-',
-				name: () => true,
-			},
-		},
 		plugins: [
 			new MiniCssExtractPlugin({
 				filename: IS_DEVELOPMENT ? '[name].css' : '[name].[hash:8].css',
