@@ -4,7 +4,7 @@
   "description": "An AWS S3 file manager.",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently --kill-others \"nodemon src/backend/web.js --watch src/backend --watch config\"",
+    "dev": "concurrently --kill-others \"nodemon src/backend/web.js --watch src/backend --watch config\" \"webpack serve\"",
     "eslint": "node_modules/eslint/bin/eslint.js ./ --ignore-path .gitignore",
     "changelog": "node_modules/conventional-changelog-cli/cli.js -n node_modules/@kelp404/changelog.config",
     "ncu": "node_modules/.bin/npm-check-updates",
@@ -23,16 +23,18 @@
   "dependencies": {
     "config": "3.3.7",
     "ejs": "3.1.7",
-    "express": "4.18.0",
+    "express": "4.18.1",
     "nocache": "3.0.3"
   },
   "devDependencies": {
-    "@babel/core": "7.17.9",
+    "@babel/core": "7.17.10",
     "@babel/eslint-parser": "7.17.0",
-    "@babel/plugin-proposal-class-properties": "7.16.7",
-    "@babel/preset-env": "7.16.11",
+    "@babel/preset-env": "7.17.10",
     "@babel/preset-react": "7.16.7",
     "@kelp404/changelog.config": "0.1.0",
+    "babel-loader": "8.2.5",
+    "capybara-router": "2.8.0",
+    "classnames": "2.3.1",
     "concurrently": "7.1.0",
     "conventional-changelog-cli": "2.2.2",
     "eslint": "8.14.0",
@@ -41,8 +43,16 @@
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-react": "7.29.4",
     "eslint-plugin-react-hooks": "4.5.0",
+    "history": "5.3.0",
+    "html-webpack-plugin": "4.5.2",
+    "mini-css-extract-plugin": "1.6.2",
     "nodemon": "2.0.16",
-    "npm-check-updates": "12.5.9",
-    "react": "18.1.0"
+    "npm-check-updates": "12.5.10",
+    "prop-types": "15.8.1",
+    "react": "18.1.0",
+    "react-dom": "18.1.0",
+    "webpack": "4.46.0",
+    "webpack-cli": "4.9.2",
+    "webpack-dev-server": "3.11.3"
   }
 }
