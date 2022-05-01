@@ -1,4 +1,5 @@
 module.exports = {
+	MODE: 'default',
 	URL: 'http://localhost:8000',
 	EXPRESS_SERVER: {
 		HOST: 'localhost',

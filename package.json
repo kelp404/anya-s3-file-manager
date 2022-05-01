@@ -4,12 +4,12 @@
   "description": "An AWS S3 file manager.",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf dist && NODE_ENV=local webpack && cp -r src/backend dist/.",
+    "build": "rm -rf dist && NODE_ENV=staging webpack && cp -r src/backend dist/.",
     "dev": "concurrently --kill-others \"nodemon src/backend/web.js --watch src/backend --watch config\" \"webpack serve\"",
     "eslint": "eslint ./ --ignore-path .gitignore",
     "changelog": "node_modules/conventional-changelog-cli/cli.js -n node_modules/@kelp404/changelog.config",
     "ncu": "npm-check-updates",
-    "start": "NODE_ENV=local node dist/backend/web.js",
+    "start": "NODE_ENV=staging node dist/backend/web.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
