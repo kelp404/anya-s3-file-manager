@@ -1,15 +1,15 @@
 const path = require('path');
 const config = require('config');
+const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = () => {
-	const MODE = process.env.NODE_ENV || 'development';
-	const IS_DEVELOPMENT = MODE === 'development';
+	const IS_DEVELOPMENT = (process.env.NODE_ENV || 'development') === 'development';
 
 	return {
 		target: 'web',
-		mode: MODE,
+		mode: IS_DEVELOPMENT ? 'development' : 'production',
 		entry: {
 			web: path.join(__dirname, 'src', 'frontend', 'web', 'index.js'),
 		},
@@ -25,7 +25,9 @@ module.exports = () => {
 		},
 		output: {
 			path: path.join(__dirname, 'dist', 'frontend'),
-			publicPath: `//${config.WEBPACK_DEV_SERVER.HOST}:${config.WEBPACK_DEV_SERVER.PORT}/`,
+			publicPath: IS_DEVELOPMENT
+				? `//${config.WEBPACK_DEV_SERVER.HOST}:${config.WEBPACK_DEV_SERVER.PORT}/`
+				: `${config.ASSETS_PATH}/`,
 			filename: IS_DEVELOPMENT ? '[name].js' : '[name].[hash:8].js',
 		},
 		module: {
@@ -91,6 +93,15 @@ module.exports = () => {
 					},
 				}),
 			}),
+			...IS_DEVELOPMENT ? [] : [
+				new CompressionWebpackPlugin({
+					deleteOriginalAssets: true,
+					filename: '[file]',
+					algorithm: 'gzip',
+					test: /\.(js|css|svg)$/,
+					threshold: 0,
+				}),
+			],
 		],
 	};
 };

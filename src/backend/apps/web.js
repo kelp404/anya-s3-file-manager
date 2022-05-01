@@ -29,6 +29,17 @@ app.locals.config = {
 	LIMIT: config.LIMIT,
 };
 
+app.use(
+	/^\/assets(?!\/express)/,
+	(req, res, next) => {
+		if (/\.(js|css|svg)$/.test(req.path)) {
+			res.set('Content-Encoding', 'gzip');
+		}
+
+		next();
+	},
+	express.static(path.join(__dirname, '..', '..', 'frontend')),
+);
 app.use(nocache(), webRouter);
 
 // Error handlers
