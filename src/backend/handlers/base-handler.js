@@ -4,6 +4,10 @@
  */
 exports.getBaseView = (req, res) => {
 	const values = {
+		browserSettings: {
+			htmlLang: 'en',
+			languageCode: 'en-us',
+		},
 		error: res.locals.error
 			? {message: `${res.locals.error}`, status: res.locals.error.status}
 			: null,

@@ -1,5 +1,6 @@
 const React = require('react');
 const PropTypes = require('prop-types');
+const _ = require('../../../languages');
 const {WEB_TITLE} = require('../../../core/constants');
 
 module.exports = class ErrorPage extends React.PureComponent {
@@ -28,9 +29,9 @@ module.exports = class ErrorPage extends React.PureComponent {
 		this.state.message = error.message || `${error}`;
 
 		if (error.status === 404) {
-			document.title = `Not found - ${WEB_TITLE}`;
+			document.title = `${_('Not found')} - ${WEB_TITLE}`;
 		} else {
-			document.title = `Error - ${WEB_TITLE}`;
+			document.title = `${_('Error')} - ${WEB_TITLE}`;
 		}
 	}
 
@@ -45,10 +46,10 @@ module.exports = class ErrorPage extends React.PureComponent {
 							<div className="col-12 col-md-8 col-lg-6">
 								<div className="card shadow my-5">
 									<div className="card-body text-center py-5">
-										<h2 className="card-title mb-4">Error {status}</h2>
+										<h2 className="card-title mb-4">{_('Error')} {status}</h2>
 										<p className="card-title mb-4">{message}</p>
 										<a className="btn btn-outline-primary btn-lg" href="/">
-											Go to homepage
+											{_('Go to homepage')}
 										</a>
 									</div>
 								</div>

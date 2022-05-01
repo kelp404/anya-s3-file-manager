@@ -12,6 +12,7 @@ module.exports = () => {
 		mode: IS_DEVELOPMENT ? 'development' : 'production',
 		entry: {
 			web: path.join(__dirname, 'src', 'frontend', 'web', 'index.js'),
+			'en-us': path.join(__dirname, 'src', 'frontend', 'languages', 'en-us.js'),
 		},
 		devServer: {
 			host: config.WEBPACK_DEV_SERVER.HOST,

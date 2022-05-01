@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= browserSettings.htmlLang ?>">
 <head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>Anya S3 File Manager</title>
@@ -30,8 +30,10 @@
 </div>
 
 <? if (config.IS_USE_DEBUG_ASSETS) { ?>
+  <script type="text/javascript" src="<?= config.ASSETS_PATH ?>/<?= browserSettings.languageCode ?>.js"></script>
   <script type="text/javascript" src="<?= config.ASSETS_PATH ?>/web.js"></script>
 <? } else { ?>
+  <script type="text/javascript" src="<?= config.ASSETS_PATH ?>/<?= browserSettings.languageCode ?>.<%= webpack.hash.substr(0, 8) %>.js"></script>
   <% for (let index = 0; index < htmlWebpackPlugin.files.js.length; index++) { %>
     <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[index] %>"></script>
   <% } %>
