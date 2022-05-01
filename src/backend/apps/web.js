@@ -1,5 +1,6 @@
 const path = require('path');
 const http = require('http');
+const config = require('config');
 const ejs = require('ejs');
 const express = require('express');
 const nocache = require('nocache');
@@ -19,6 +20,14 @@ ejs.delimiter = '?';
 app.set('views', path.join(__dirname, '..', '..', 'frontend', 'express'));
 app.engine('html', ejs.renderFile);
 app.set('view engine', 'html');
+
+app.locals.archive = (object = null) => Buffer.from(JSON.stringify(object)).toString('base64');
+app.locals.config = {
+	IS_USE_DEBUG_ASSETS: config.IS_USE_DEBUG_ASSETS,
+	ASSETS_PATH: config.ASSETS_PATH,
+	COOKIES: config.COOKIES,
+	LIMIT: config.LIMIT,
+};
 
 app.use(nocache(), webRouter);
 

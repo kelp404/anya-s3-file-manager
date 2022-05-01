@@ -1,3 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <title>Anya S3 File Manager</title>
+
+  <? if (config.IS_USE_DEBUG_ASSETS) { ?>
+    <link rel="stylesheet" href="<?= config.ASSETS_PATH ?>/web.css"/>
+  <? } else { ?>
+    <link rel="stylesheet" href="<?= config.ASSETS_PATH ?>/web.<%= webpack.hash.substr(0, 8) %>.css"/>
+  <? } ?>
+
+  <script type="text/javascript">
+    function decodeBase64(text) {
+      return decodeURIComponent(atob(text).split('').map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+    }
+    window.config = JSON.parse(decodeBase64('<?- archive(config) ?>'));
+    window.error = JSON.parse(decodeBase64('<?- archive(error) ?>'));
+  </script>
+</head>
+<body>
+<div id="root">
+  <div class="text-center text-muted py-5">
+    <div class="spinner-border">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<? if (config.IS_USE_DEBUG_ASSETS) { ?>
+  <script type="text/javascript" src="<?= config.ASSETS_PATH ?>/web.js"></script>
+<? } else { ?>
+  <% for (let index = 0; index < htmlWebpackPlugin.files.js.length; index++) { %>
+    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[index] %>"></script>
+  <% } %>
+<? } ?>
+</body>
 </html>
