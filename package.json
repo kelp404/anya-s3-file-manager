@@ -6,11 +6,14 @@
   "scripts": {
     "build": "rm -rf dist && NODE_ENV=staging webpack && cp -r src/backend dist/.",
     "dev": "concurrently --kill-others \"nodemon src/backend/web.js --watch src/backend --watch config\" \"webpack serve\"",
-    "eslint": "eslint ./ --ignore-path .gitignore",
+    "eslint": "eslint ./ --ignore-path .gitignore --ignore-pattern migrations/",
     "changelog": "node_modules/conventional-changelog-cli/cli.js -n node_modules/@kelp404/changelog.config",
     "ncu": "npm-check-updates",
     "start": "NODE_ENV=staging node dist/backend/web.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "makemigration": "makemigration --name $npm_package_version --models-path src/backend/models/data && eslint migrations --fix || true",
+    "runmigration:dev": "runmigration --models-path src/backend/models/data",
+    "runmigration": "NODE_ENV=staging runmigration --models-path dist/backend/models/data"
   },
   "repository": {
     "type": "git",
@@ -23,10 +26,13 @@
   },
   "homepage": "https://github.com/kelp404/anya-s3-storage#readme",
   "dependencies": {
+    "@kelp404/sequelize-auto-migrations": "1.3.1",
     "config": "3.3.7",
     "ejs": "3.1.7",
     "express": "4.18.1",
-    "nocache": "3.0.3"
+    "nocache": "3.0.3",
+    "sequelize": "6.19.0",
+    "sqlite3": "5.0.6"
   },
   "devDependencies": {
     "@babel/core": "7.17.10",

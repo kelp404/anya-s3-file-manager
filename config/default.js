@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = {
 	MODE: 'default',
 	URL: 'http://localhost:8000',
@@ -9,6 +11,7 @@ module.exports = {
 		HOST: 'localhost',
 		PORT: 8001,
 	},
+	DATABASE_PATH: path.join('caches', 'data.db'),
 	IS_USE_DEBUG_ASSETS: true,
 	ASSETS_PATH: '//localhost:8001',
 	COOKIES: {
