@@ -9,6 +9,8 @@ const webRouter = require('../routers/web-router');
 const {setAssetsHeader, assetsHandler} = require('../middlewares/assets');
 const baseHandler = require('../handlers/base-handler');
 
+const {IS_USE_DEBUG_ASSETS, ASSETS_PATH, COOKIES, LIMIT} = config;
+
 const app = express();
 const server = http.createServer(app);
 
@@ -24,10 +26,10 @@ app.set('view engine', 'html');
 
 app.locals.archive = (object = null) => Buffer.from(JSON.stringify(object)).toString('base64');
 app.locals.config = {
-	IS_USE_DEBUG_ASSETS: config.IS_USE_DEBUG_ASSETS,
-	ASSETS_PATH: config.ASSETS_PATH,
-	COOKIES: config.COOKIES,
-	LIMIT: config.LIMIT,
+	IS_USE_DEBUG_ASSETS,
+	ASSETS_PATH,
+	COOKIES,
+	LIMIT,
 };
 
 app.use(/^\/assets(?!\/express)/, setAssetsHeader(), assetsHandler());
