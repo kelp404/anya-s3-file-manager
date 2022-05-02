@@ -3,6 +3,8 @@ const http = require('http');
 const config = require('config');
 const ejs = require('ejs');
 const express = require('express');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const nocache = require('nocache');
 const {Http404} = require('../models/errors');
 const webRouter = require('../routers/web-router');
@@ -32,6 +34,8 @@ app.locals.config = {
 	LIMIT,
 };
 
+app.use(cookieParser());
+app.use(bodyParser.json());
 app.use(/^\/assets(?!\/express)/, setAssetsHeader(), assetsHandler());
 app.use(nocache(), webRouter);
 

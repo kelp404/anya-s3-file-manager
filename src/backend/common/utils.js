@@ -70,6 +70,39 @@ exports.decryptCookieValue = text => {
 	return Buffer.concat([decipher.update(Buffer.from(text, 'base64')), decipher.final()]).toString();
 };
 
+/**
+ * @param {Object} req
+ * @returns {null|{bucket: string, secret: string, region: string, key: string}}
+ */
+exports.getS3Settings = req => {
+	const {validateS3Settings} = require('../validators/s3-settings-validator');
+	const s3SettingsFromConfig = {
+		key: S3?.KEY,
+		secret: S3?.SECRET,
+		region: S3?.REGION,
+		bucket: S3?.BUCKET,
+	};
+
+	const checkConfigResult = validateS3Settings(s3SettingsFromConfig);
+
+	if (checkConfigResult === true) {
+		return s3SettingsFromConfig;
+	}
+
+	try {
+		const cookieValue = req.cookies[COOKIES.S3_SETTINGS.NAME];
+		const json = exports.decryptCookieValue(cookieValue);
+		const s3SettingsFromCookie = JSON.parse(json);
+		const checkCookieResult = validateS3Settings(s3SettingsFromCookie);
+
+		if (checkCookieResult === true) {
+			return s3SettingsFromCookie;
+		}
+	} catch (_) {}
+
+	return null;
+};
+
 exports.logError = error => {
 	if (IS_LOG_ERROR) {
 		console.error(error);
