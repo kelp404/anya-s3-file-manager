@@ -4,6 +4,8 @@ const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
+const {WEBPACK_DEV_SERVER, ASSETS_PATH, GZIP_FILE_PATTERN} = config;
+
 module.exports = () => {
 	const IS_DEVELOPMENT = (process.env.NODE_ENV || 'development') === 'development';
 
@@ -15,8 +17,8 @@ module.exports = () => {
 			'en-us': path.join(__dirname, 'src', 'frontend', 'languages', 'en-us.js'),
 		},
 		devServer: {
-			host: config.WEBPACK_DEV_SERVER.HOST,
-			port: config.WEBPACK_DEV_SERVER.PORT,
+			host: WEBPACK_DEV_SERVER.HOST,
+			port: WEBPACK_DEV_SERVER.PORT,
 			headers: {
 				'Access-Control-Allow-Origin': '*',
 				'Access-Control-Max-Age': '3000',
@@ -27,8 +29,8 @@ module.exports = () => {
 		output: {
 			path: path.join(__dirname, 'dist', 'frontend'),
 			publicPath: IS_DEVELOPMENT
-				? `//${config.WEBPACK_DEV_SERVER.HOST}:${config.WEBPACK_DEV_SERVER.PORT}/`
-				: `${config.ASSETS_PATH}/`,
+				? `//${WEBPACK_DEV_SERVER.HOST}:${WEBPACK_DEV_SERVER.PORT}/`
+				: `${ASSETS_PATH}/`,
 			filename: IS_DEVELOPMENT ? '[name].js' : '[name].[hash:8].js',
 		},
 		module: {
@@ -69,7 +71,7 @@ module.exports = () => {
 							options: {
 								esModule: false,
 								name: 'resources/[name].[hash:8].[ext]',
-								publicPath: `//${config.WEBPACK_DEV_SERVER.HOST}:${config.WEBPACK_DEV_SERVER.PORT}/`,
+								publicPath: `//${WEBPACK_DEV_SERVER.HOST}:${WEBPACK_DEV_SERVER.PORT}/`,
 							},
 						},
 					],
@@ -99,7 +101,7 @@ module.exports = () => {
 					deleteOriginalAssets: true,
 					filename: '[file]',
 					algorithm: 'gzip',
-					test: /\.(js|css|svg)$/,
+					test: GZIP_FILE_PATTERN,
 					threshold: 0,
 				}),
 			],

@@ -6,6 +6,7 @@ const express = require('express');
 const nocache = require('nocache');
 const {Http404} = require('../models/errors');
 const webRouter = require('../routers/web-router');
+const {setAssetsHeader, assetsHandler} = require('../middlewares/assets');
 const baseHandler = require('../handlers/base-handler');
 
 const app = express();
@@ -29,17 +30,7 @@ app.locals.config = {
 	LIMIT: config.LIMIT,
 };
 
-app.use(
-	/^\/assets(?!\/express)/,
-	(req, res, next) => {
-		if (/\.(js|css|svg)$/.test(req.path)) {
-			res.set('Content-Encoding', 'gzip');
-		}
-
-		next();
-	},
-	express.static(path.join(__dirname, '..', '..', 'frontend')),
-);
+app.use(/^\/assets(?!\/express)/, setAssetsHeader(), assetsHandler());
 app.use(nocache(), webRouter);
 
 // Error handlers
