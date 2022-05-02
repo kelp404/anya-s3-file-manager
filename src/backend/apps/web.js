@@ -9,9 +9,12 @@ const nocache = require('nocache');
 const {Http404} = require('../models/errors');
 const webRouter = require('../routers/web-router');
 const {setAssetsHeader, assetsHandler} = require('../middlewares/assets');
+const requestLogger = require('../middlewares/request-logger');
 const baseHandler = require('../handlers/base-handler');
 
-const {IS_USE_DEBUG_ASSETS, ASSETS_PATH, COOKIES, LIMIT} = config;
+const {
+	IS_USE_DEBUG_ASSETS, ASSETS_PATH, COOKIES, LIMIT, IS_LOG_REQUEST,
+} = config;
 
 const app = express();
 const server = http.createServer(app);
@@ -33,6 +36,10 @@ app.locals.config = {
 	COOKIES,
 	LIMIT,
 };
+
+if (IS_LOG_REQUEST) {
+	app.use(requestLogger());
+}
 
 app.use(cookieParser());
 app.use(bodyParser.json());

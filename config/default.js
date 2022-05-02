@@ -12,6 +12,7 @@ module.exports = {
 		PORT: 8001,
 	},
 	DATABASE_PATH: path.join('caches', 'data.db'),
+	IS_LOG_REQUEST: true,
 	IS_LOG_ERROR: true,
 	IS_LOG_SQL: true,
 	S3: null,
