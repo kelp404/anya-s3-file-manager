@@ -4,7 +4,7 @@ const config = require('config');
 const {Sequelize} = require('sequelize');
 
 const {
-	DATABASE_PATH, IS_LOG_ERROR, IS_LOG_SQL, S3, COOKIES, COOKIE_CIPHER,
+	DATABASE_PATH, IS_LOG_ERROR, IS_LOG_SQL, S3, COOKIE_CIPHER,
 } = config;
 
 exports._sequelize = null;
@@ -71,36 +71,24 @@ exports.decryptCookieValue = text => {
 };
 
 /**
- * @param {Object} req
- * @returns {null|{bucket: string, secret: string, region: string, key: string}}
+ * @returns {{bucket: string, secret: string, region: string, key: string}}
  */
-exports.getS3Settings = req => {
+exports.getS3Settings = () => {
+	const {Http500} = require('../models/errors');
 	const {validateS3Settings} = require('../validators/s3-settings-validator');
-	const s3SettingsFromConfig = {
+	const s3SettingsFrom = {
 		key: S3?.KEY,
 		secret: S3?.SECRET,
 		region: S3?.REGION,
 		bucket: S3?.BUCKET,
 	};
+	const checkResult = validateS3Settings(s3SettingsFrom);
 
-	const checkConfigResult = validateS3Settings(s3SettingsFromConfig);
-
-	if (checkConfigResult === true) {
-		return s3SettingsFromConfig;
+	if (checkResult !== true) {
+		throw new Http500('S3 settings failed', checkResult);
 	}
 
-	try {
-		const cookieValue = req.cookies[COOKIES.S3_SETTINGS.NAME];
-		const json = exports.decryptCookieValue(cookieValue);
-		const s3SettingsFromCookie = JSON.parse(json);
-		const checkCookieResult = validateS3Settings(s3SettingsFromCookie);
-
-		if (checkCookieResult === true) {
-			return s3SettingsFromCookie;
-		}
-	} catch (_) {}
-
-	return null;
+	return s3SettingsFrom;
 };
 
 exports.logError = error => {
