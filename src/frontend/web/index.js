@@ -1,11 +1,14 @@
 // Stylesheets
 require('../stylesheets/web.scss');
 
+const nprogress = require('nprogress');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const {RouterView} = require('capybara-router');
 const Loading = require('../core/components/loading');
 const router = require('./router');
+
+nprogress.configure({showSpinner: false});
 
 // Todo: debug code
 router.listen('ChangeStart', (action, toState, fromState, next) => {

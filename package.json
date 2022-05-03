@@ -65,6 +65,7 @@
     "node-sass": "7.0.1",
     "nodemon": "2.0.16",
     "npm-check-updates": "12.5.10",
+    "nprogress": "0.2.0",
     "prop-types": "15.8.1",
     "pupa": "3.1.0",
     "react": "18.1.0",
