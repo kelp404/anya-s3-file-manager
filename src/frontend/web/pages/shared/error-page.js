@@ -2,6 +2,8 @@ const React = require('react');
 const PropTypes = require('prop-types');
 const _ = require('../../../languages');
 const {WEB_TITLE} = require('../../../core/constants');
+const Navigation = require('../../components/navigation');
+const Footer = require('../../components/footer');
 
 module.exports = class ErrorPage extends React.PureComponent {
 	static propTypes = {
@@ -40,6 +42,7 @@ module.exports = class ErrorPage extends React.PureComponent {
 
 		return (
 			<>
+				<Navigation/>
 				<div className="main-content">
 					<div className="container">
 						<div className="row justify-content-center">
@@ -57,7 +60,7 @@ module.exports = class ErrorPage extends React.PureComponent {
 						</div>
 					</div>
 				</div>
-				{/* <Footer/> */}
+				<Footer/>
 			</>
 		);
 	}
