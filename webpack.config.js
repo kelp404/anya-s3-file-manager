@@ -10,7 +10,7 @@ module.exports = () => {
 	const IS_DEVELOPMENT = (process.env.NODE_ENV || 'development') === 'development';
 
 	return {
-		target: 'web',
+		target: ['web', 'es5'],
 		mode: IS_DEVELOPMENT ? 'development' : 'production',
 		entry: {
 			web: path.join(__dirname, 'src', 'frontend', 'web', 'index.js'),
