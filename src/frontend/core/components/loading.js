@@ -19,7 +19,7 @@ module.exports = class Loading extends React.Component {
 		return (
 			<div className={classNames('text-center text-muted py-5', this.props.className)}>
 				<div className="spinner-border">
-					<span className="visually-hidden">Loading...</span>
+					<span className="sr-only">Loading...</span>
 				</div>
 			</div>
 		);

@@ -1,3 +1,6 @@
+// Stylesheets
+require('../stylesheets/web.scss');
+
 const React = require('react');
 const ReactDOM = require('react-dom');
 const {RouterView} = require('capybara-router');
