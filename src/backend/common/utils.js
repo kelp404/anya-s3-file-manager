@@ -1,8 +1,6 @@
 const crypto = require('crypto');
 const path = require('path');
-const util = require('util');
 const config = require('config');
-const readPackageJson = require('read-package-json');
 const {Sequelize} = require('sequelize');
 
 const {
@@ -76,13 +74,4 @@ exports.logError = error => {
 	if (IS_LOG_ERROR) {
 		console.error(error);
 	}
-};
-
-/**
- * @returns {Promise<{version: string}>}
- */
-exports.loadPackageInformation = async () => {
-	const readJson = util.promisify(readPackageJson);
-
-	return readJson(path.join(__dirname, '..', '..', '..', 'package.json'));
 };
