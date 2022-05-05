@@ -8,6 +8,6 @@ const attributes = {
 		allowNull: false,
 	},
 };
-const Tag = sequelize.define('tag', attributes);
+const Model = sequelize.define('tag', attributes);
 
-module.exports = Tag;
+module.exports = Model;
