@@ -1,9 +1,17 @@
+const config = require('config');
+
 /*
  * Don't throw an error at base view handlers.
  * Make sure handles are available at any situations.
  */
 exports.getBaseView = (req, res) => {
+	const {IS_USE_DEBUG_ASSETS, ASSETS_PATH, LIMIT} = config;
 	const values = {
+		config: {
+			IS_USE_DEBUG_ASSETS,
+			ASSETS_PATH,
+			LIMIT,
+		},
 		browserSettings: {
 			htmlLang: 'en',
 			languageCode: 'en-us',

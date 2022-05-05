@@ -30,12 +30,6 @@ app.engine('html', ejs.renderFile);
 app.set('view engine', 'html');
 
 app.locals.archive = (object = null) => Buffer.from(JSON.stringify(object)).toString('base64');
-app.locals.config = {
-	IS_USE_DEBUG_ASSETS,
-	ASSETS_PATH,
-	COOKIES,
-	LIMIT,
-};
 
 if (IS_LOG_REQUEST) {
 	app.use(requestLogger());
