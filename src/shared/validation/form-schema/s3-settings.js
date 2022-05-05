@@ -1,20 +1,20 @@
 exports.s3SettingsFormSchema = {
-	key: {
+	KEY: {
 		type: 'string',
 		empty: false,
 		max: 255,
 	},
-	secret: {
+	SECRET: {
 		type: 'string',
 		empty: false,
 		max: 255,
 	},
-	region: {
+	REGION: {
 		type: 'string',
 		empty: false,
 		max: 255,
 	},
-	bucket: {
+	BUCKET: {
 		type: 'string',
 		empty: false,
 		max: 255,

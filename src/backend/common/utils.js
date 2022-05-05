@@ -4,7 +4,7 @@ const config = require('config');
 const {Sequelize} = require('sequelize');
 
 const {
-	DATABASE_PATH, IS_LOG_ERROR, IS_LOG_SQL, S3, COOKIE_CIPHER,
+	DATABASE_PATH, IS_LOG_ERROR, IS_LOG_SQL, COOKIE_CIPHER,
 } = config;
 
 exports._sequelize = null;
@@ -68,27 +68,6 @@ exports.decryptCookieValue = text => {
 	);
 
 	return Buffer.concat([decipher.update(Buffer.from(text, 'base64')), decipher.final()]).toString();
-};
-
-/**
- * @returns {{bucket: string, secret: string, region: string, key: string}}
- */
-exports.getS3Settings = () => {
-	const {Http500} = require('../models/errors');
-	const {validateS3Settings} = require('../validators/s3-settings-validator');
-	const s3SettingsFrom = {
-		key: S3?.KEY,
-		secret: S3?.SECRET,
-		region: S3?.REGION,
-		bucket: S3?.BUCKET,
-	};
-	const checkResult = validateS3Settings(s3SettingsFrom);
-
-	if (checkResult !== true) {
-		throw new Http500('S3 settings failed', checkResult);
-	}
-
-	return s3SettingsFrom;
 };
 
 exports.logError = error => {
