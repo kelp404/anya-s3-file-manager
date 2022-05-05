@@ -7,6 +7,7 @@ const config = require('config');
 const sqlite3 = require('sqlite3').verbose();
 const {ENVIRONMENT_MODE} = require('./models/constants');
 const {validateS3Settings} = require('./validators/s3-settings-validator');
+const utils = require('./common/utils');
 
 const {
 	DATABASE_PATH, S3, MODE,
@@ -127,6 +128,7 @@ function launchServer() {
 
 async function execute() {
 	await initialDatabase();
+	utils.connectDatabase();
 	launchServer();
 }
 

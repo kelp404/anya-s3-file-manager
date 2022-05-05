@@ -1,4 +1,7 @@
+const fs = require('fs');
+const path = require('path');
 const {program} = require('commander');
+const config = require('config');
 const pLimit = require('p-limit');
 
 program
@@ -15,9 +18,11 @@ program
 program.parse(process.argv);
 
 async function sync() {
+	const LOCAL_DATABASE_PATH = path.join(__dirname, config.DATABASE_PATH);
 	const utils = require('./src/backend/common/utils');
 	const limit = pLimit(1);
 
+	fs.rmSync(LOCAL_DATABASE_PATH, {force: true});
 	utils.connectDatabase({isLogSQL: true});
 
 	const models = require('./src/backend/models/data');
