@@ -10,7 +10,7 @@ const {validateS3Settings} = require('./validators/s3-settings-validator');
 const utils = require('./common/utils');
 
 const {
-	DATABASE_PATH, S3, MODE,
+	DATABASE_PATH, S3, MODE, EXPRESS_SERVER,
 } = config;
 const LOCAL_DATABASE_PATH = path.join(__dirname, '..', '..', DATABASE_PATH);
 
@@ -120,9 +120,8 @@ async function initialDatabase() {
 function launchServer() {
 	const {server} = require('./apps/web');
 
-	server.listen(config.EXPRESS_SERVER.PORT, config.EXPRESS_SERVER.HOST, () => {
-		const {address, port} = server.address();
-		console.log(`Server listening at http://${address}:${port}`);
+	server.listen(EXPRESS_SERVER.PORT, EXPRESS_SERVER.HOST, () => {
+		console.log(`Server listening at http://${EXPRESS_SERVER.HOST}:${EXPRESS_SERVER.PORT}`);
 	});
 }
 
