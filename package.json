@@ -4,8 +4,8 @@
   "description": "An AWS S3 file manager.",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf dist && NODE_ENV=staging webpack && cp -r src/backend dist/.",
     "dev": "concurrently --kill-others \"nodemon src/backend/web.js --watch src/backend --watch config\" \"webpack serve\"",
+    "build": "rm -rf dist && NODE_ENV=staging webpack && cp -r src/backend src/shared dist/.",
     "eslint": "eslint ./ --ignore-path .gitignore --ignore-pattern migrations/",
     "changelog": "node_modules/conventional-changelog-cli/cli.js -n node_modules/@kelp404/changelog.config",
     "ncu": "npm-check-updates",
