@@ -7,7 +7,10 @@ const sqlite3 = require('sqlite3').verbose();
 const {ENVIRONMENT_MODE} = require('./models/constants');
 const {validateS3Settings} = require('./validators/s3-settings-validator');
 const utils = require('./common/utils');
-const {downloadDatabaseFromS3} = require('./common/s3');
+const {
+	downloadDatabaseFromS3,
+	scanFilesOnS3,
+} = require('./common/s3');
 
 const {
 	DATABASE_PATH, S3, MODE, EXPRESS_SERVER,
@@ -42,6 +45,7 @@ async function createDatabase(path, {force} = {}) {
 async function initialDatabase() {
 	let db;
 	let databaseFileOnS3;
+	let isNeedScanS3;
 	const checkS3SettingsResult = validateS3Settings(S3);
 
 	if (checkS3SettingsResult !== true) {
@@ -65,7 +69,9 @@ async function initialDatabase() {
 		// Not found local database file.
 		databaseFileOnS3 = await downloadDatabaseFromS3({logger: console.log});
 
-		if (databaseFileOnS3 != null) {
+		if (databaseFileOnS3 == null) {
+			isNeedScanS3 = true;
+		} else {
 			fs.writeFileSync(LOCAL_DATABASE_PATH, databaseFileOnS3.Body);
 		}
 	}
@@ -78,6 +84,11 @@ async function initialDatabase() {
 	const migrationResult = execSync(migrationScript);
 
 	console.log(migrationResult.toString());
+	utils.connectDatabase();
+
+	if (isNeedScanS3) {
+		await scanFilesOnS3();
+	}
 }
 
 function launchServer() {
@@ -90,7 +101,6 @@ function launchServer() {
 
 async function execute() {
 	await initialDatabase();
-	utils.connectDatabase();
 	launchServer();
 }
 

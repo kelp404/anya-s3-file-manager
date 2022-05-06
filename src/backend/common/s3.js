@@ -1,9 +1,19 @@
+const path = require('path');
 const AWS = require('aws-sdk');
 const config = require('config');
+const File = require('../models/data/file');
+const {
+	FILE_TYPE,
+} = require('../models/constants');
 
 const {
 	S3,
 } = config;
+const s3 = new AWS.S3({
+	accessKeyId: S3.KEY,
+	secretAccessKey: S3.SECRET,
+	region: S3.REGION,
+});
 
 /**
  * @returns {Promise<null|
@@ -18,11 +28,6 @@ const {
  */
 exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
 	const isShowLog = typeof logger === 'function';
-	const s3 = new AWS.S3({
-		accessKeyId: S3.KEY,
-		secretAccessKey: S3.SECRET,
-		region: S3.REGION,
-	});
 
 	try {
 		if (isShowLog) {
@@ -46,5 +51,26 @@ exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
 
 		throw error;
 	}
+};
+
+exports.scanFilesOnS3 = async () => {
+	const scanObjects = async continuationToken => {
+		const result = await s3
+			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken, MaxKeys: 2})
+			.promise();
+
+		await Promise.all([
+			File.bulkCreate(result.Contents.map(content => ({
+				type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
+				path: content.Key,
+				title: path.basename(content.Key),
+				lastModified: content.LastModified,
+				size: content.Size,
+			}))),
+			result.NextContinuationToken ? scanObjects(result.NextContinuationToken) : null,
+		]);
+	};
+
+	await scanObjects();
 };
 
