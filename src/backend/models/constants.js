@@ -3,4 +3,8 @@ module.exports = {
 		DEFAULT: 'default',
 		STAGING: 'staging',
 	},
+	FILE_TYPE: {
+		FOLDER: 1,
+		FILE: 2,
+	},
 };

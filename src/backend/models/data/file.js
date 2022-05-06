@@ -1,11 +1,33 @@
 const lodash = require('lodash');
 const {DataTypes} = require('sequelize');
 const {connectDatabase} = require('../../common/utils');
+const {
+	FILE_TYPE,
+} = require('../constants');
 
 const {sequelize} = connectDatabase();
 const attributes = {
+	type: {
+		type: DataTypes.TINYINT,
+		allowNull: false,
+		validate: {
+			isIn: [Object.values(FILE_TYPE)],
+		},
+	},
 	path: {
-		type: DataTypes.STRING,
+		type: new DataTypes.STRING(1024),
+		allowNull: false,
+	},
+	title: {
+		type: new DataTypes.STRING(1024),
+		allowNull: false,
+	},
+	lastModified: {
+		type: DataTypes.DATE,
+		allowNull: false,
+	},
+	size: {
+		type: DataTypes.BIGINT.UNSIGNED,
 		allowNull: false,
 	},
 };
