@@ -6,19 +6,17 @@ const attributes = {
 	fileId: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
+		primaryKey: true,
 	},
 	tagId: {
 		type: DataTypes.INTEGER,
 		allowNull: false,
+		primaryKey: true,
 	},
 };
 const options = {
 	timestamps: false,
 	indexes: [
-		{
-			unique: true,
-			fields: ['fileId', 'tagId'],
-		},
 		{
 			unique: false,
 			fields: ['tagId', 'fileId'],
