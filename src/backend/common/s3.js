@@ -1,6 +1,7 @@
 const path = require('path');
 const AWS = require('aws-sdk');
 const config = require('config');
+const {Op} = require('sequelize');
 const File = require('../models/data/file');
 const {
 	FILE_TYPE,
@@ -54,23 +55,34 @@ exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
 };
 
 exports.scanFilesOnS3 = async () => {
+	const start = new Date();
 	const scanObjects = async continuationToken => {
 		const result = await s3
 			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken, MaxKeys: 2})
 			.promise();
 
 		await Promise.all([
-			File.bulkCreate(result.Contents.map(content => ({
-				type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
-				path: content.Key,
-				title: path.basename(content.Key),
-				lastModified: content.LastModified,
-				size: content.Size,
-			}))),
+			File.bulkCreate(
+				result.Contents.map(content => ({
+					type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
+					path: content.Key,
+					title: path.basename(content.Key),
+					lastModified: content.LastModified,
+					size: content.Size,
+				})),
+				{
+					updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt'],
+				},
+			),
 			result.NextContinuationToken ? scanObjects(result.NextContinuationToken) : null,
 		]);
 	};
 
 	await scanObjects();
+
+	// Remove missing files.
+	await File.destroy({
+		where: {updatedAt: {[Op.lt]: start}},
+	});
 };
 

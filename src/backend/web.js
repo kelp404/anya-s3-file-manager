@@ -45,7 +45,6 @@ async function createDatabase(path, {force} = {}) {
 async function initialDatabase() {
 	let db;
 	let databaseFileOnS3;
-	let isNeedScanS3;
 	const checkS3SettingsResult = validateS3Settings(S3);
 
 	if (checkS3SettingsResult !== true) {
@@ -69,9 +68,7 @@ async function initialDatabase() {
 		// Not found local database file.
 		databaseFileOnS3 = await downloadDatabaseFromS3({logger: console.log});
 
-		if (databaseFileOnS3 == null) {
-			isNeedScanS3 = true;
-		} else {
+		if (databaseFileOnS3 != null) {
 			fs.writeFileSync(LOCAL_DATABASE_PATH, databaseFileOnS3.Body);
 		}
 	}
@@ -85,10 +82,8 @@ async function initialDatabase() {
 
 	console.log(migrationResult.toString());
 	utils.connectDatabase();
-
-	if (isNeedScanS3) {
-		await scanFilesOnS3();
-	}
+	console.log('Sync files from S3.');
+	await scanFilesOnS3();
 }
 
 function launchServer() {

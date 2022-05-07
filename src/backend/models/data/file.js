@@ -37,6 +37,10 @@ const options = {
 			unique: true,
 			fields: ['path'],
 		},
+		{
+			unique: false,
+			fields: ['updatedAt'],
+		},
 	],
 };
 const Model = sequelize.define('file', attributes, options);
