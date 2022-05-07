@@ -54,7 +54,7 @@ exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
 	}
 };
 
-exports.scanFilesOnS3 = async () => {
+exports.syncFilesFromS3 = async () => {
 	const start = new Date();
 	const scanObjects = async continuationToken => {
 		const result = await s3

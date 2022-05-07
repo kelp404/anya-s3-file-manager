@@ -9,7 +9,7 @@ const {validateS3Settings} = require('./validators/s3-settings-validator');
 const utils = require('./common/utils');
 const {
 	downloadDatabaseFromS3,
-	scanFilesOnS3,
+	syncFilesFromS3,
 } = require('./common/s3');
 
 const {
@@ -83,7 +83,7 @@ async function initialDatabase() {
 	console.log(migrationResult.toString());
 	utils.connectDatabase();
 	console.log('Sync files from S3.');
-	await scanFilesOnS3();
+	await syncFilesFromS3();
 }
 
 function launchServer() {
