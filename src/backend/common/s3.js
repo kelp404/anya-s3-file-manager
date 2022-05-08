@@ -58,7 +58,7 @@ exports.syncFilesFromS3 = async () => {
 	const start = new Date();
 	const scanObjects = async continuationToken => {
 		const result = await s3
-			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken, MaxKeys: 2})
+			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken})
 			.promise();
 
 		await Promise.all([
