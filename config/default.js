@@ -30,6 +30,10 @@ module.exports = {
 		KEY: '0dd2abb4aca4e7ee1af64133c62a8de705c086f589ca6de3869767662df1a84b',
 		IV: 'cc57728778bbcb36a44a56bc81e1b7fb',
 	},
+	PAGINATION: {
+		DEFAULT_LIMIT: 50,
+		MAX_LIMIT: 100,
+	},
 	LIMIT: {
 		FILE_SIZE: 900 * 1024 * 1024, // 900MB
 	},
