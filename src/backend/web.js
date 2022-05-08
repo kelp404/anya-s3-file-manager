@@ -4,7 +4,7 @@ const path = require('path');
 const util = require('util');
 const config = require('config');
 const sqlite3 = require('sqlite3').verbose();
-const {ENVIRONMENT_MODE} = require('./models/constants');
+const {ENVIRONMENT_MODE} = require('../shared/constants');
 const {validateS3Settings} = require('./validators/s3-settings-validator');
 const {connectDatabase} = require('./common/database');
 const {

@@ -3,9 +3,7 @@ const AWS = require('aws-sdk');
 const config = require('config');
 const {Op} = require('sequelize');
 const File = require('../models/data/file');
-const {
-	FILE_TYPE,
-} = require('../models/constants');
+const {FILE_TYPE} = require('../../shared/constants');
 
 const {
 	S3,
