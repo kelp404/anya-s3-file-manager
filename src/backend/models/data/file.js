@@ -16,7 +16,25 @@ const attributes = {
 		type: new DataTypes.STRING(1024),
 		allowNull: false,
 	},
-	title: {
+	/**
+	 * The folder name.
+	 * AWS S3 Key: dirname
+	 * "test.txt": "."
+	 * "a/b/": "a"
+	 * "a/b/test.txt": "a/b"
+	 */
+	dirname: {
+		type: new DataTypes.STRING(1024),
+		allowNull: false,
+	},
+	/**
+	 * The file, folder name.
+	 * AWS S3 Key: dirname
+	 * "test.txt": "test.txt"
+	 * "a/b/": "b"
+	 * "a/b/test.txt": "test.txt"
+	 */
+	basename: {
 		type: new DataTypes.STRING(1024),
 		allowNull: false,
 	},

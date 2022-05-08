@@ -64,7 +64,8 @@ exports.syncFilesFromS3 = async () => {
 				result.Contents.map(content => ({
 					type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
 					path: content.Key,
-					title: path.basename(content.Key),
+					dirname: path.dirname(content.Key),
+					basename: path.basename(content.Key),
 					lastModified: content.LastModified,
 					size: content.Size,
 				})),
