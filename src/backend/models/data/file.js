@@ -43,7 +43,7 @@ const attributes = {
 		allowNull: false,
 	},
 	size: {
-		type: DataTypes.BIGINT.UNSIGNED,
+		type: DataTypes.BIGINT,
 		allowNull: false,
 	},
 };
