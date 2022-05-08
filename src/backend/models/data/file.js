@@ -1,6 +1,6 @@
 const lodash = require('lodash');
 const {DataTypes} = require('sequelize');
-const {connectDatabase} = require('../../common/utils');
+const {connectDatabase} = require('../../common/database');
 const {
 	FILE_TYPE,
 } = require('../constants');

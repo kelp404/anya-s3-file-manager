@@ -1,5 +1,5 @@
 const {DataTypes} = require('sequelize');
-const {connectDatabase} = require('../../common/utils');
+const {connectDatabase} = require('../../common/database');
 
 const {sequelize} = connectDatabase();
 const attributes = {

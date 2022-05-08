@@ -19,11 +19,11 @@ program.parse(process.argv);
 
 async function sync() {
 	const LOCAL_DATABASE_PATH = path.join(__dirname, config.DATABASE_PATH);
-	const utils = require('./src/backend/common/utils');
+	const {connectDatabase} = require('./src/backend/common/database');
 	const limit = pLimit(1);
 
 	fs.rmSync(LOCAL_DATABASE_PATH, {force: true});
-	utils.connectDatabase({isLogSQL: true});
+	connectDatabase({isLogSQL: true});
 
 	const models = require('./src/backend/models/data');
 

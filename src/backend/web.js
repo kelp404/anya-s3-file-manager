@@ -6,7 +6,7 @@ const config = require('config');
 const sqlite3 = require('sqlite3').verbose();
 const {ENVIRONMENT_MODE} = require('./models/constants');
 const {validateS3Settings} = require('./validators/s3-settings-validator');
-const utils = require('./common/utils');
+const {connectDatabase} = require('./common/database');
 const {
 	downloadDatabaseFromS3,
 	syncFilesFromS3,
@@ -81,7 +81,7 @@ async function initialDatabase() {
 	const migrationResult = execSync(migrationScript);
 
 	console.log(migrationResult.toString());
-	utils.connectDatabase();
+	connectDatabase();
 	console.log('Sync files from S3.');
 	await syncFilesFromS3();
 }
