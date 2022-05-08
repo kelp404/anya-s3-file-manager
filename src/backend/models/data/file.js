@@ -35,7 +35,7 @@ const attributes = {
 	 * "a/b/test.txt": "test.txt"
 	 */
 	basename: {
-		type: new DataTypes.STRING(1024),
+		type: DataTypes.CITEXT,
 		allowNull: false,
 	},
 	lastModified: {
@@ -56,6 +56,10 @@ const options = {
 		{
 			unique: false,
 			fields: ['updatedAt'],
+		},
+		{
+			unique: false,
+			fields: ['dirname', 'type', 'basename'],
 		},
 	],
 };
