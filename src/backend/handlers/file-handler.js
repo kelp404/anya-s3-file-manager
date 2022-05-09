@@ -1,9 +1,13 @@
 const config = require('config');
+const {Op} = require('sequelize');
 const {
 	validateGetFilesQuery,
 } = require('../validators/file-validator');
 const File = require('../models/data/file');
-const {Http422} = require('../models/errors');
+const {
+	Http404,
+	Http422,
+} = require('../models/errors');
 
 const {
 	PAGINATION,
@@ -25,14 +29,43 @@ exports.getFiles = async (req, res) => {
 	const {
 		dirname = '.', after, limit = PAGINATION.DEFAULT_LIMIT,
 	} = req.query;
+	const where = {
+		dirname,
+	};
+
+	if (after) {
+		const cursor = await File.findOne({
+			where: {id: after},
+			attributes: ['id', 'type', 'basename'],
+		});
+
+		if (cursor == null) {
+			throw new Http404(`not found file ${after}`);
+		}
+
+		where[Op.or] = [
+			{
+				[Op.and]: [
+					{type: {[Op.gte]: cursor.type}},
+					{basename: {[Op.gt]: cursor.basename}},
+				],
+			},
+			{
+				[Op.and]: [
+					{type: {[Op.gte]: cursor.type}},
+					{basename: cursor.basename},
+					{id: {[Op.gt]: cursor.id}},
+				],
+			},
+		];
+	}
 
 	const files = await File.findAll({
-		where: {
-			dirname,
-		},
+		where,
 		order: [
 			['type', 'ASC'],
 			['basename', 'ASC'],
+			['id', 'ASC'],
 		],
 		limit,
 	});

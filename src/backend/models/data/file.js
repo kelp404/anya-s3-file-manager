@@ -59,7 +59,7 @@ const options = {
 		},
 		{
 			unique: false,
-			fields: ['dirname', 'type', 'basename'],
+			fields: ['dirname', 'type', 'basename', 'id'],
 		},
 	],
 };
