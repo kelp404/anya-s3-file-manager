@@ -67,11 +67,11 @@ exports.getFiles = async (req, res) => {
 			['basename', 'ASC'],
 			['id', 'ASC'],
 		],
-		limit,
+		limit: limit + 1,
 	});
 
 	res.json({
-		query: {dirname, after, limit},
-		files,
+		hasNextPage: files.length > limit,
+		files: files.slice(0, limit),
 	});
 };
