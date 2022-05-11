@@ -1,6 +1,7 @@
 // Stylesheets
 require('../stylesheets/web.scss');
 
+require('@babel/polyfill');
 const nprogress = require('nprogress');
 const React = require('react');
 const ReactDOM = require('react-dom');

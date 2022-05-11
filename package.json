@@ -44,6 +44,7 @@
   "devDependencies": {
     "@babel/core": "7.17.10",
     "@babel/eslint-parser": "7.17.0",
+    "@babel/polyfill": "7.12.1",
     "@babel/preset-env": "7.17.10",
     "@babel/preset-react": "7.16.7",
     "@kelp404/changelog.config": "0.1.0",
