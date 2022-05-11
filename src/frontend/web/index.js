@@ -9,12 +9,14 @@ const {RouterView} = require('capybara-router');
 const {PUSH, REPLACE, RELOAD} = require('capybara-router/lib/constants/history-actions');
 const utils = require('../core/utils');
 const Loading = require('../core/components/loading');
+const {cancelAllFrontRequests} = require('../core/apis');
 const router = require('./router');
 
 nprogress.configure({showSpinner: false});
 
 router.listen('ChangeStart', (action, toState, fromState, next) => {
 	nprogress.start();
+	cancelAllFrontRequests();
 	if (window.error) {
 		// Backend need we render the error page.
 		setTimeout(() => {

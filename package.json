@@ -48,6 +48,7 @@
     "@babel/preset-env": "7.17.10",
     "@babel/preset-react": "7.16.7",
     "@kelp404/changelog.config": "0.1.0",
+    "axios": "0.27.2",
     "babel-loader": "8.2.5",
     "bootstrap": "4.6.1",
     "capybara-router": "2.8.0",
