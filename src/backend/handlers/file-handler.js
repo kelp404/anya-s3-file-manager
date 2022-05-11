@@ -72,6 +72,6 @@ exports.getFiles = async (req, res) => {
 
 	res.json({
 		hasNextPage: files.length > limit,
-		files: files.slice(0, limit),
+		items: files.slice(0, limit),
 	});
 };

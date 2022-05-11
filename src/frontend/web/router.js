@@ -1,6 +1,7 @@
 const {Router} = require('capybara-router');
 const history = require('history');
 const _ = require('../languages');
+const api = require('../core/apis/web');
 const {WEB_TITLE} = require('../core/constants');
 
 const webTitle = _(WEB_TITLE);
@@ -20,6 +21,9 @@ module.exports = new Router({
 			uri: '/',
 			onEnter() {
 				document.title = webTitle;
+			},
+			resolve: {
+				files: () => api.file.getFiles().then(response => response.data),
 			},
 			loadComponent: () => import(
 				/* webpackChunkName: "web-home" */
