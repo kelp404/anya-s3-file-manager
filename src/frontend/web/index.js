@@ -4,7 +4,7 @@ require('../stylesheets/web.scss');
 require('@babel/polyfill');
 const nprogress = require('nprogress');
 const React = require('react');
-const ReactDOM = require('react-dom');
+const {createRoot} = require('react-dom/client');
 const {RouterView} = require('capybara-router');
 const {PUSH, REPLACE, RELOAD} = require('capybara-router/lib/constants/history-actions');
 const utils = require('../core/utils');
@@ -47,7 +47,6 @@ router.listen('ChangeError', error => {
 	nprogress.done();
 });
 
-ReactDOM.render(
+createRoot(document.getElementById('root')).render(
 	<RouterView><Loading/></RouterView>,
-	document.getElementById('root'),
 );
