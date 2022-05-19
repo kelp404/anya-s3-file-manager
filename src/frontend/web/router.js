@@ -31,6 +31,20 @@ module.exports = new Router({
 			),
 		},
 		{
+			name: 'web.files',
+			uri: '/files?dirname',
+			onEnter() {
+				document.title = `${_('Files')} - ${webTitle}`;
+			},
+			resolve: {
+				files: () => api.file.getFiles().then(response => response.data),
+			},
+			loadComponent: () => import(
+				/* webpackChunkName: "web-files" */
+				'./pages/file/files'
+			),
+		},
+		{
 			name: 'not-found',
 			uri: '.*',
 			component: require('./pages/shared/not-found'),

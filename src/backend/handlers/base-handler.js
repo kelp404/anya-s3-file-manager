@@ -5,13 +5,16 @@ const config = require('config');
  * Make sure handles are available at any situations.
  */
 exports.getBaseView = (req, res) => {
-	const {IS_USE_DEBUG_ASSETS, ASSETS_PATH, LIMIT} = config;
+	const {IS_USE_DEBUG_ASSETS, ASSETS_PATH, LIMIT, S3} = config;
 
 	const values = {
 		config: {
 			IS_USE_DEBUG_ASSETS,
 			ASSETS_PATH,
 			LIMIT,
+			S3: {
+				BUCKET: S3.BUCKET,
+			},
 		},
 		browserSettings: {
 			htmlLang: 'en',
