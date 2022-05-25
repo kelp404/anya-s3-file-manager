@@ -1,3 +1,4 @@
+const PropTypes = require('prop-types');
 const React = require('react');
 const {Link} = require('capybara-router');
 const Base = require('../../../core/pages/base');
@@ -5,8 +6,17 @@ const Base = require('../../../core/pages/base');
 const {S3} = window.config;
 
 module.exports = class FilesPage extends Base {
+	static propTypes = {
+		params: PropTypes.shape({
+			dirname: PropTypes.string,
+		}).isRequired,
+	};
+
 	constructor(props) {
 		super(props);
+
+		const folders = props.params.dirname?.split('/') || [];
+
 		this.state = {
 			breadcrumb: {
 				items: [
@@ -15,6 +25,11 @@ module.exports = class FilesPage extends Base {
 						title: S3.BUCKET,
 						urlParams: {dirname: null},
 					},
+					...folders.map((folder, index) => ({
+						id: Math.random().toString(36),
+						title: folder,
+						urlParams: {dirname: folders.slice(0, index + 1).join('/')},
+					})),
 				],
 			},
 		};
