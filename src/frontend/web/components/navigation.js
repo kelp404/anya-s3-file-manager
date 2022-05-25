@@ -32,7 +32,7 @@ module.exports = class Navigation extends Base {
 					<div className="collapse navbar-collapse" id="navbarSupportedContent">
 						<ul className="navbar-nav me-auto mb-0">
 							<li className="nav-item">
-								<a className="nav-link" href="/">{_('Files')}</a>
+								<Link className="nav-link" to="/files">{_('Files')}</Link>
 							</li>
 							<li className="nav-item">
 								<a className="nav-link" href="/settings">{_('Settings')}</a>
