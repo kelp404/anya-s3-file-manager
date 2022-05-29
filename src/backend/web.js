@@ -2,20 +2,18 @@ const {execSync} = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
+const bluebird = require('bluebird');
 const config = require('config');
 const sqlite3 = require('sqlite3').verbose();
 const {ENVIRONMENT_MODE} = require('../shared/constants');
-const {validateS3Settings} = require('./validators/s3-settings-validator');
-const {connectDatabase} = require('./common/database');
-const {
-	downloadDatabaseFromS3,
-	syncFilesFromS3,
-} = require('./common/s3');
 
 const {
 	DATABASE_PATH, S3, MODE, EXPRESS_SERVER,
 } = config;
 const LOCAL_DATABASE_PATH = path.join(__dirname, '..', '..', DATABASE_PATH);
+
+bluebird.longStackTraces();
+global.Promise = bluebird;
 
 /**
  * @param {string} path
@@ -43,6 +41,13 @@ async function createDatabase(path, {force} = {}) {
 }
 
 async function initialDatabase() {
+	const {validateS3Settings} = require('./validators/s3-settings-validator');
+	const {connectDatabase} = require('./common/database');
+	const {
+		downloadDatabaseFromS3,
+		syncFilesFromS3,
+	} = require('./common/s3');
+
 	let db;
 	let databaseFileOnS3;
 	const checkS3SettingsResult = validateS3Settings(S3);
