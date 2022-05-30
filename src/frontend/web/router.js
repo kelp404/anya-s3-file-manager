@@ -37,7 +37,7 @@ module.exports = new Router({
 				document.title = `${_('Files')} - ${webTitle}`;
 			},
 			resolve: {
-				files: () => api.file.getFiles().then(response => response.data),
+				files: ({dirname}) => api.file.getFiles({dirname}).then(response => response.data),
 			},
 			loadComponent: () => import(
 				/* webpackChunkName: "web-files" */

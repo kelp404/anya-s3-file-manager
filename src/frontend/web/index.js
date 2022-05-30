@@ -3,6 +3,8 @@ require('../stylesheets/web.scss');
 
 require('@babel/polyfill');
 const nprogress = require('nprogress');
+const dayjs = require('dayjs');
+const LocalizedFormat = require('dayjs/plugin/localizedFormat');
 const React = require('react');
 const {createRoot} = require('react-dom/client');
 const {RouterView} = require('capybara-router');
@@ -12,6 +14,7 @@ const Loading = require('../core/components/loading');
 const {cancelAllFrontRequests} = require('../core/apis');
 const router = require('./router');
 
+dayjs.extend(LocalizedFormat);
 nprogress.configure({showSpinner: false});
 
 router.listen('ChangeStart', (action, toState, fromState, next) => {
