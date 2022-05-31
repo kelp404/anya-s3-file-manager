@@ -1,6 +1,7 @@
 const path = require('path');
 const config = require('config');
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -33,6 +34,20 @@ module.exports = () => {
 				: `${ASSETS_PATH}/`,
 			filename: IS_DEVELOPMENT ? '[name].js' : '[name].[hash:8].js',
 		},
+		optimization: {
+			minimize: !IS_DEVELOPMENT,
+			minimizer: [
+				'...',
+				new CssMinimizerPlugin({
+					minimizerOptions: {
+						preset: [
+							'default',
+							{discardComments: {removeAll: true}},
+						],
+					},
+				}),
+			],
+		},
 		module: {
 			rules: [
 				{
@@ -49,13 +64,6 @@ module.exports = () => {
 					],
 				},
 				{
-					test: /\.css$/,
-					use: [
-						{loader: MiniCssExtractPlugin.loader},
-						{loader: 'css-loader'},
-					],
-				},
-				{
 					test: /\.scss$/,
 					use: [
 						{loader: MiniCssExtractPlugin.loader},
@@ -65,16 +73,10 @@ module.exports = () => {
 				},
 				{
 					test: /\.(jpg|png|gif|eot|svg|woff|woff2|ttf)$/,
-					use: [
-						{
-							loader: 'file-loader',
-							options: {
-								esModule: false,
-								name: 'resources/[name].[hash:8].[ext]',
-								publicPath: `//${WEBPACK_DEV_SERVER.HOST}:${WEBPACK_DEV_SERVER.PORT}/`,
-							},
-						},
-					],
+					type: 'asset/resource',
+					generator: {
+						filename: 'resources/[name].[hash:8][ext]',
+					},
 				},
 			],
 		},
