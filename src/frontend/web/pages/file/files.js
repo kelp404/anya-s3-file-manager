@@ -94,6 +94,13 @@ module.exports = class FilesPage extends Base {
 							{
 								files.items.map(file => (
 									<div key={file.id} className="d-flex align-items-end border-top">
+										<div className="pr-0 py-2 pl-2 text-muted">
+											{
+												file.type === FILE_TYPE.FILE
+													? <i className="fa-fw fa-regular fa-file-lines"/>
+													: <i className="fa-fw fa-regular fa-folder"/>
+											}
+										</div>
 										<div className="flex-grow-1 p-2 text-truncate">
 											{
 												file.type === FILE_TYPE.FILE
