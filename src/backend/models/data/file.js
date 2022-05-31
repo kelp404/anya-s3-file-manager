@@ -19,7 +19,7 @@ const attributes = {
 	/**
 	 * The folder name.
 	 * AWS S3 Key: dirname
-	 * "test.txt": "."
+	 * "test.txt": ""
 	 * "a/b/": "a"
 	 * "a/b/test.txt": "a/b"
 	 */

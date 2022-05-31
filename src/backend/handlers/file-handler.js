@@ -27,7 +27,7 @@ exports.getFiles = async (req, res) => {
 	}
 
 	const {
-		dirname = '.', after, limit = PAGINATION.DEFAULT_LIMIT,
+		dirname = '', after, limit = PAGINATION.DEFAULT_LIMIT,
 	} = req.query;
 	const where = {
 		dirname,

@@ -61,17 +61,19 @@ exports.syncFilesFromS3 = async () => {
 
 		await Promise.all([
 			File.bulkCreate(
-				result.Contents.map(content => ({
-					type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
-					path: content.Key,
-					dirname: path.dirname(content.Key),
-					basename: path.basename(content.Key),
-					lastModified: content.LastModified,
-					size: content.Size,
-				})),
-				{
-					updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt'],
-				},
+				result.Contents.map(content => {
+					const dirname = path.dirname(content.Key);
+
+					return {
+						type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
+						path: content.Key,
+						dirname: dirname === '.' ? '' : dirname,
+						basename: path.basename(content.Key),
+						lastModified: content.LastModified,
+						size: content.Size,
+					};
+				}),
+				{updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt']},
 			),
 			result.NextContinuationToken ? scanObjects(result.NextContinuationToken) : null,
 		]);
