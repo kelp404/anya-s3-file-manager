@@ -1,9 +1,12 @@
 const PropTypes = require('prop-types');
 const React = require('react');
 const {Link} = require('capybara-router');
+const InfiniteScroll = require('@kelp404/react-infinite-scroller');
 const {
 	FILE_TYPE,
 } = require('../../../../shared/constants');
+const api = require('../../../core/apis/web');
+const Loading = require('../../../core/components/loading');
 const Base = require('../../../core/pages/base');
 const utils = require('../../../core/utils');
 const _ = require('../../../languages');
@@ -32,6 +35,7 @@ module.exports = class FilesPage extends Base {
 		const folders = props.params.dirname?.split('/') || [];
 
 		this.state = {
+			files: {...props.files, items: [null, ...props.files.items]},
 			breadcrumb: {
 				items: [
 					{
@@ -49,13 +53,80 @@ module.exports = class FilesPage extends Base {
 		};
 	}
 
-	render() {
-		const {files} = this.props;
-		const {breadcrumb} = this.state;
+	loadNextPage = async () => {
+		const response = await api.file.getFiles({
+			...this.props.params,
+			after: this.state.files.items[this.state.files.items.length - 1].id,
+		});
+
+		return new Promise(resolve => {
+			this.setState(
+				prevState => ({
+					files: {
+						...response.data,
+						items: [
+							...prevState.files.items,
+							...response.data.items,
+						],
+					},
+				}),
+				resolve,
+			);
+		});
+	};
+
+	infiniteScrollLoadingComponent = (
+		<div key="loading" className="border-top"><Loading/></div>
+	);
+
+	filesHeaderComponent = (
+		<div key={0} className="d-flex align-items-end bg-light">
+			<div className="flex-grow-1 p-2 text-truncate">
+				<strong>{_('Name')}</strong>
+			</div>
+			<div className="p-2 text-truncate" style={{minWidth: '270px'}}>
+				<strong>{_('Last modified')}</strong>
+			</div>
+			<div className="p-2" style={{minWidth: '86px'}}>
+				<strong>{_('Size')}</strong>
+			</div>
+		</div>
+	);
+
+	renderFileRow = file => {
 		const generateLinkToParams = file => ({
 			name: 'web.files',
 			params: {dirname: `${file.dirname}${file.basename}`},
 		});
+
+		return (
+			<div key={file.id} className="d-flex align-items-end border-top">
+				<div className="pr-0 py-2 pl-2 text-muted">
+					{
+						file.type === FILE_TYPE.FILE
+							? <i className="fa-fw fa-regular fa-file-lines"/>
+							: <i className="fa-fw fa-regular fa-folder"/>
+					}
+				</div>
+				<div className="flex-grow-1 p-2 text-truncate">
+					{
+						file.type === FILE_TYPE.FILE
+							? file.basename
+							: <Link to={generateLinkToParams(file)}>{file.basename}</Link>
+					}
+				</div>
+				<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
+					{file.type === FILE_TYPE.FILE ? utils.formatDate(file.lastModified) : '-'}
+				</pre>
+				<pre className="p-2 m-0 text-right" style={{minWidth: '86px'}}>
+					{file.type === FILE_TYPE.FILE ? utils.formatSize(file.size) : '-'}
+				</pre>
+			</div>
+		);
+	};
+
+	render() {
+		const {breadcrumb, files} = this.state;
 
 		return (
 			<div className="container-fluid py-3">
@@ -79,45 +150,24 @@ module.exports = class FilesPage extends Base {
 
 				<div className="row files-wrapper">
 					<div className="col-12">
-						<div className="border rounded">
-							<div className="d-flex align-items-end bg-light">
-								<div className="flex-grow-1 p-2 text-truncate">
-									<strong>{_('Name')}</strong>
-								</div>
-								<div className="p-2 text-truncate" style={{minWidth: '270px'}}>
-									<strong>{_('Last modified')}</strong>
-								</div>
-								<div className="p-2" style={{minWidth: '86px'}}>
-									<strong>{_('Size')}</strong>
-								</div>
-							</div>
-							{
-								files.items.map(file => (
-									<div key={file.id} className="d-flex align-items-end border-top">
-										<div className="pr-0 py-2 pl-2 text-muted">
-											{
-												file.type === FILE_TYPE.FILE
-													? <i className="fa-fw fa-regular fa-file-lines"/>
-													: <i className="fa-fw fa-regular fa-folder"/>
-											}
-										</div>
-										<div className="flex-grow-1 p-2 text-truncate">
-											{
-												file.type === FILE_TYPE.FILE
-													? file.basename
-													: <Link to={generateLinkToParams(file)}>{file.basename}</Link>
-											}
-										</div>
-										<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
-											{file.type === FILE_TYPE.FILE ? utils.formatDate(file.lastModified) : '-'}
-										</pre>
-										<pre className="p-2 m-0 text-right" style={{minWidth: '86px'}}>
-											{file.type === FILE_TYPE.FILE ? utils.formatSize(file.size) : '-'}
-										</pre>
-									</div>
-								))
-							}
-						</div>
+						{
+							files.items.length > 0 && (
+								<InfiniteScroll
+									className="border rounded"
+									pageStart={0}
+									loadMore={this.loadNextPage}
+									hasMore={files.hasNextPage}
+									loader={this.infiniteScrollLoadingComponent}
+								>
+									{
+										files.items.map((file, index) => index === 0
+											? this.filesHeaderComponent
+											: this.renderFileRow(file),
+										)
+									}
+								</InfiniteScroll>
+							)
+						}
 					</div>
 				</div>
 			</div>
