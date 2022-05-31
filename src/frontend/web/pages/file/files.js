@@ -52,6 +52,10 @@ module.exports = class FilesPage extends Base {
 	render() {
 		const {files} = this.props;
 		const {breadcrumb} = this.state;
+		const generateLinkToParams = file => ({
+			name: 'web.files',
+			params: {dirname: `${file.dirname}${file.basename}`},
+		});
 
 		return (
 			<div className="container-fluid py-3">
@@ -91,7 +95,11 @@ module.exports = class FilesPage extends Base {
 								files.items.map(file => (
 									<div key={file.id} className="d-flex align-items-end border-top">
 										<div className="flex-grow-1 p-2 text-truncate">
-											{file.basename}
+											{
+												file.type === FILE_TYPE.FILE
+													? file.basename
+													: <Link to={generateLinkToParams(file)}>{file.basename}</Link>
+											}
 										</div>
 										<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
 											{file.type === FILE_TYPE.FILE ? utils.formatDate(file.lastModified) : '-'}
