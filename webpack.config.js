@@ -103,6 +103,7 @@ module.exports = () => {
 					algorithm: 'gzip',
 					test: GZIP_FILE_PATTERN,
 					threshold: 0,
+					minRatio: Number.MAX_SAFE_INTEGER,
 				}),
 			],
 		],
