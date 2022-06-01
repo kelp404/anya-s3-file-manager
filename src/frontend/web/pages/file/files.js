@@ -80,7 +80,7 @@ module.exports = class FilesPage extends Base {
 	);
 
 	filesHeaderComponent = (
-		<div key={0} className="d-flex align-items-end bg-light">
+		<div key={0} className="d-flex align-items-end">
 			<div className="flex-grow-1 p-2 text-truncate">
 				<strong>{_('Name')}</strong>
 			</div>
@@ -100,7 +100,7 @@ module.exports = class FilesPage extends Base {
 		});
 
 		return (
-			<div key={file.id} className="d-flex align-items-end border-top">
+			<div key={file.id} className="file-row d-flex align-items-end border-top">
 				<div className="pr-0 py-2 pl-2 text-muted">
 					{
 						file.type === FILE_TYPE.FILE
