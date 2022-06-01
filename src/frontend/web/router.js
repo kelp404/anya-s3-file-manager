@@ -22,9 +22,6 @@ module.exports = new Router({
 			onEnter() {
 				document.title = webTitle;
 			},
-			resolve: {
-				files: () => api.file.getFiles().then(response => response.data),
-			},
 			component: require('./pages/home'),
 		},
 		{
