@@ -54,26 +54,30 @@ module.exports = class FilesPage extends Base {
 	}
 
 	loadNextPage = async () => {
-		const {fileTable} = this.state;
-		const response = await api.file.getFiles({
-			...this.props.params,
-			after: fileTable.items[fileTable.items.length - 1].id,
-		});
+		try {
+			const {fileTable} = this.state;
+			const response = await api.file.getFiles({
+				...this.props.params,
+				after: fileTable.items[fileTable.items.length - 1].id,
+			});
 
-		return new Promise(resolve => {
-			this.setState(
-				prevState => ({
-					fileTable: {
-						...response.data,
-						items: [
-							...prevState.fileTable.items,
-							...response.data.items,
-						],
-					},
-				}),
-				resolve,
-			);
-		});
+			return new Promise(resolve => {
+				this.setState(
+					prevState => ({
+						fileTable: {
+							...response.data,
+							items: [
+								...prevState.fileTable.items,
+								...response.data.items,
+							],
+						},
+					}),
+					resolve,
+				);
+			});
+		} catch (error) {
+			utils.renderError(error);
+		}
 	};
 
 	infiniteScrollLoadingComponent = (
