@@ -35,7 +35,7 @@ module.exports = class FilesPage extends Base {
 		const folders = props.params.dirname?.split('/') || [];
 
 		this.state = {
-			files: {...props.files, items: [null, ...props.files.items]},
+			fileTable: {...props.files, items: [null, ...props.files.items]},
 			breadcrumb: {
 				items: [
 					{
@@ -54,18 +54,19 @@ module.exports = class FilesPage extends Base {
 	}
 
 	loadNextPage = async () => {
+		const {fileTable} = this.state;
 		const response = await api.file.getFiles({
 			...this.props.params,
-			after: this.state.files.items[this.state.files.items.length - 1].id,
+			after: fileTable.items[fileTable.items.length - 1].id,
 		});
 
 		return new Promise(resolve => {
 			this.setState(
 				prevState => ({
-					files: {
+					fileTable: {
 						...response.data,
 						items: [
-							...prevState.files.items,
+							...prevState.fileTable.items,
 							...response.data.items,
 						],
 					},
@@ -91,6 +92,10 @@ module.exports = class FilesPage extends Base {
 				<strong>{_('Size')}</strong>
 			</div>
 		</div>
+	);
+
+	emptyFileRowComponent = (
+		<div className="p-4 border-top text-muted text-center">{_('Empty')}</div>
 	);
 
 	renderFileRow = file => {
@@ -126,7 +131,7 @@ module.exports = class FilesPage extends Base {
 	};
 
 	render() {
-		const {breadcrumb, files} = this.state;
+		const {breadcrumb, fileTable} = this.state;
 
 		return (
 			<div className="container-fluid py-3">
@@ -151,16 +156,24 @@ module.exports = class FilesPage extends Base {
 				<div className="row files-wrapper">
 					<div className="col-12">
 						{
-							files.items.length > 0 && (
+							fileTable.items.length === 1 && (
+								<div className="border rounded">
+									{this.filesHeaderComponent}
+									{this.emptyFileRowComponent}
+								</div>
+							)
+						}
+						{
+							fileTable.items.length > 1 && (
 								<InfiniteScroll
 									className="border rounded"
 									pageStart={0}
 									loadMore={this.loadNextPage}
-									hasMore={files.hasNextPage}
+									hasMore={fileTable.hasNextPage}
 									loader={this.infiniteScrollLoadingComponent}
 								>
 									{
-										files.items.map((file, index) => index === 0
+										fileTable.items.map((file, index) => index === 0
 											? this.filesHeaderComponent
 											: this.renderFileRow(file),
 										)
