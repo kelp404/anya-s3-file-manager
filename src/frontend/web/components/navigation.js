@@ -1,4 +1,5 @@
 const {getRouter, Link} = require('capybara-router');
+const classnames = require('classnames');
 const React = require('react');
 const _ = require('../../languages');
 const {WEB_TITLE} = require('../../core/constants');
@@ -23,6 +24,8 @@ module.exports = class Navigation extends Base {
 	}
 
 	render() {
+		const {currentRouteName} = this.state;
+
 		return (
 			<nav className="navbar sticky-top navbar-dark bg-dark navbar-expand-md">
 				<div className="container-fluid">
@@ -31,7 +34,7 @@ module.exports = class Navigation extends Base {
 					</Link>
 					<div className="collapse navbar-collapse" id="navbarSupportedContent">
 						<ul className="navbar-nav me-auto mb-0">
-							<li className="nav-item">
+							<li className={classnames('nav-item', {active: currentRouteName === 'web.files'})}>
 								<Link className="nav-link" to="/files">{_('Files')}</Link>
 							</li>
 							<li className="nav-item">
