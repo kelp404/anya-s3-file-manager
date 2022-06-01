@@ -13,11 +13,8 @@ const {
 	PAGINATION,
 } = config;
 
-/**
- * GET /api/files
- * @param {Object} req
- * @param {Object} res
- * @returns {Promise<void>}
+/*
+	GET /api/files
  */
 exports.getFiles = async (req, res) => {
 	const checkResult = validateGetFilesQuery(req.query);
