@@ -2,7 +2,7 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const config = require('config');
 const {Op} = require('sequelize');
-const File = require('../models/data/file');
+const FileModel = require('../models/data/file-model');
 const {FILE_TYPE} = require('../../shared/constants');
 
 const {
@@ -60,7 +60,7 @@ exports.syncFilesFromS3 = async () => {
 			.promise();
 
 		await Promise.all([
-			File.bulkCreate(
+			FileModel.bulkCreate(
 				result.Contents.map(content => {
 					const dirname = path.dirname(content.Key);
 
@@ -82,7 +82,7 @@ exports.syncFilesFromS3 = async () => {
 	await scanObjects();
 
 	// Remove missing files.
-	await File.destroy({
+	await FileModel.destroy({
 		where: {updatedAt: {[Op.lt]: start}},
 	});
 };

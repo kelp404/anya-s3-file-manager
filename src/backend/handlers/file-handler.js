@@ -3,7 +3,7 @@ const {Op} = require('sequelize');
 const {
 	validateGetFilesQuery,
 } = require('../validators/file-validator');
-const File = require('../models/data/file');
+const FileModel = require('../models/data/file-model');
 const {
 	Http404,
 	Http422,
@@ -34,7 +34,7 @@ exports.getFiles = async (req, res) => {
 	};
 
 	if (after) {
-		const cursor = await File.findOne({
+		const cursor = await FileModel.findOne({
 			where: {id: after},
 			attributes: ['id', 'type', 'basename'],
 		});
@@ -60,7 +60,7 @@ exports.getFiles = async (req, res) => {
 		];
 	}
 
-	const files = await File.findAll({
+	const files = await FileModel.findAll({
 		where,
 		order: [
 			['type', 'ASC'],
