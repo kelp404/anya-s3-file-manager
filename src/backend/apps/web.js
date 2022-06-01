@@ -50,7 +50,7 @@ app.use((error, req, res, _) => {
 	res.status(error.status);
 	res.locals.error = error;
 
-	if (req.headers.accept && req.headers.accept.includes('application/json')) {
+	if (req.headers.accept?.includes('application/json')) {
 		// Return JSON.
 		res.json({
 			message: `${error}`,
