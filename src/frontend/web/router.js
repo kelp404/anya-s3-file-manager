@@ -25,10 +25,7 @@ module.exports = new Router({
 			resolve: {
 				files: () => api.file.getFiles().then(response => response.data),
 			},
-			loadComponent: () => import(
-				/* webpackChunkName: "web-home" */
-				'./pages/home'
-			),
+			component: require('./pages/home'),
 		},
 		{
 			name: 'web.files',
