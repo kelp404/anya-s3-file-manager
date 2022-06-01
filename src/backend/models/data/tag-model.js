@@ -5,7 +5,7 @@ const {connectDatabase} = require('../../common/database');
 const {sequelize} = connectDatabase();
 const attributes = {
 	title: {
-		type: DataTypes.STRING,
+		type: DataTypes.CITEXT,
 		allowNull: false,
 	},
 };
