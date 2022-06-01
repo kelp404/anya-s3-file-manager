@@ -1,7 +1,7 @@
 class Http400 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'bad request');
@@ -18,7 +18,7 @@ class Http400 extends Error {
 class Http401 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		// Redirect to the login page.
@@ -36,7 +36,7 @@ class Http401 extends Error {
 class Http403 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'permission denied');
@@ -53,7 +53,7 @@ class Http403 extends Error {
 class Http404 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'resource not found');
@@ -70,7 +70,7 @@ class Http404 extends Error {
 class Http409 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'conflict');
@@ -87,7 +87,7 @@ class Http409 extends Error {
 class Http422 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'unprocessable entity');
@@ -104,7 +104,7 @@ class Http422 extends Error {
 class Http429 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'too many requests');
@@ -121,7 +121,7 @@ class Http429 extends Error {
 class Http500 extends Error {
 	/**
    * @param {*} message
-   * @param {{frontendOperationCode: string, frontendOperationValues: *}|undefined} extra
+   * @param {{frontendOperationCode: string, frontendOperationValue: *}|undefined} extra
    */
 	constructor(message, extra) {
 		super(message || 'server error');

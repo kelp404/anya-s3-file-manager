@@ -10,5 +10,6 @@ expressRouter.get('/files', baseHandler.getBaseView);
 
 expressRouter.get('/api/files', fileHandler.getFiles);
 expressRouter.get('/api/tags', tagHandler.getTags);
+expressRouter.post('/api/tags', tagHandler.createTag);
 
 module.exports = expressRouter.router;
