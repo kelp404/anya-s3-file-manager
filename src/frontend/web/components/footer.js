@@ -9,8 +9,8 @@ module.exports = class Footer extends React.Component {
 
 	render() {
 		return (
-			<footer className="container-fluid py-5">
-				<div className="row bg-dark text-light">
+			<footer className="container-fluid py-5 bg-dark">
+				<div className="row text-light">
 					<div className="col-12 col-md-6">
 						<h4>{_(WEB_TITLE)}</h4>
 						<p className="mb-5">
