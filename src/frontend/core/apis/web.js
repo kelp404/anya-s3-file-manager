@@ -4,10 +4,10 @@ const BASE_PATH = '/api';
 
 module.exports = {
 	file: {
-		getFiles: ({dirname, after, limit} = {}) => sendRequest({
+		getFiles: ({dirname, keyword, after, limit} = {}) => sendRequest({
 			method: 'get',
 			url: `${BASE_PATH}/files`,
-			params: {dirname, after, limit},
+			params: {dirname, keyword, after, limit},
 		}),
 	},
 	tag: {

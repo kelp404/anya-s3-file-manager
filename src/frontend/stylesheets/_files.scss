@@ -1,3 +1,8 @@
+.breadcrumb-wrapper {
+  background-color: $breadcrumb-bg;
+  @include border-radius($breadcrumb-border-radius);
+}
+
 .files-wrapper {
   .file-row:hover {
     background-color: $gray-200;

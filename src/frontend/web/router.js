@@ -29,12 +29,12 @@ module.exports = new Router({
 		},
 		{
 			name: 'web.files',
-			uri: '/files?dirname?tagId',
+			uri: '/files?dirname?keyword?tagId',
 			onEnter() {
 				document.title = `${_('Files')} - ${webTitle}`;
 			},
 			resolve: {
-				files: ({dirname}) => api.file.getFiles({dirname}).then(response => response.data),
+				files: ({dirname, keyword}) => api.file.getFiles({dirname, keyword}).then(response => response.data),
 			},
 			loadComponent: () => import(
 				/* webpackChunkName: "web-files" */

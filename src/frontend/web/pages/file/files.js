@@ -1,7 +1,7 @@
 const classnames = require('classnames');
 const PropTypes = require('prop-types');
 const React = require('react');
-const {Link} = require('capybara-router');
+const {Link, getRouter} = require('capybara-router');
 const InfiniteScroll = require('@kelp404/react-infinite-scroller');
 const {
 	FILE_TYPE,
@@ -42,7 +42,9 @@ module.exports = class FilesPage extends Base {
 
 		const folders = props.params.dirname?.split('/') || [];
 
+		this.currentRoute = getRouter().findRouteByName('web.files');
 		this.state = {
+			keyword: props.params.keyword || '',
 			fileTable: {...props.files, items: [null, ...props.files.items]},
 			tagTable: {...props.tags},
 			breadcrumb: {
@@ -67,6 +69,30 @@ module.exports = class FilesPage extends Base {
 			},
 		};
 	}
+
+	/**
+   * @param {string} paramKey - The parameter key.
+   * @param {*} value
+   *  Pass null to remove the parameter.
+   *  Pass undefined to use `event.target.value`.
+   * @returns {function(Event)} - (event) =>
+   */
+	generateChangeFilterHandler = (paramKey, value) => event => {
+		event.preventDefault();
+		getRouter().go({
+			name: this.currentRoute.name,
+			params: {
+				...this.props.params,
+				[paramKey]: value === undefined
+					? event.target.value
+					: value == null ? undefined : value,
+			},
+		});
+	};
+
+	onChangeKeyword = event => {
+		this.setState({keyword: event.target.value});
+	};
 
 	loadNextPage = async () => {
 		try {
@@ -120,7 +146,7 @@ module.exports = class FilesPage extends Base {
 	renderFileRow = file => {
 		const {params} = this.props;
 		const generateLinkToParams = file => ({
-			name: 'web.files',
+			name: this.currentRoute.name,
 			params: {...params, dirname: `${file.dirname}${file.basename}`},
 		});
 
@@ -152,7 +178,7 @@ module.exports = class FilesPage extends Base {
 
 	render() {
 		const {params} = this.props;
-		const {breadcrumb, tagTable, fileTable} = this.state;
+		const {breadcrumb, keyword, tagTable, fileTable} = this.state;
 
 		return (
 			<div className="container-fluid py-3">
@@ -179,7 +205,7 @@ module.exports = class FilesPage extends Base {
 												'list-group-item list-group-item-action text-truncate',
 												{active: tag.id === Number(params.tagId)},
 											)}
-											to={{name: 'web.files', params: {...params, tagId: `${tag.id}`}}}
+											to={{name: this.currentRoute.name, params: {...params, tagId: `${tag.id}`}}}
 										>
 											{tag.title}
 										</Link>
@@ -190,19 +216,45 @@ module.exports = class FilesPage extends Base {
 					</div>
 
 					<div className="col-12 col-md-8 col-lg-9 col-xl-10">
-						<nav aria-label="breadcrumb">
-							<ol className="breadcrumb">
-								{
-									breadcrumb.items.map(item => (
-										<li key={item.id} className="breadcrumb-item">
-											<Link to={{name: 'web.files', params: item.urlParams}}>
-												{item.title}
-											</Link>
-										</li>
-									))
-								}
-							</ol>
-						</nav>
+						<div className="breadcrumb-wrapper d-flex justify-content-between mb-3">
+							<nav>
+								<ol className="breadcrumb mb-0">
+									{
+										breadcrumb.items.map(item => (
+											<li key={item.id} className="breadcrumb-item">
+												<Link to={{name: this.currentRoute.name, params: item.urlParams}}>
+													{item.title}
+												</Link>
+											</li>
+										))
+									}
+								</ol>
+							</nav>
+
+							<form className="form-row align-items-center pr-3">
+								<div className="col-auto my-1">
+									<div className="input-group">
+										<input
+											type="text"
+											className="form-control border-secondary"
+											placeholder={_('Name')}
+											autoFocus={Boolean(keyword)}
+											value={keyword}
+											onChange={this.onChangeKeyword}
+										/>
+										<div className="input-group-append">
+											<button
+												className="btn btn-outline-secondary"
+												type="submit"
+												onClick={this.generateChangeFilterHandler('keyword', keyword || null)}
+											>
+												{_('Search')}
+											</button>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
 
 						{
 							fileTable.items.length === 1 && (
