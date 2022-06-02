@@ -1,3 +1,4 @@
+const classnames = require('classnames');
 const PropTypes = require('prop-types');
 const React = require('react');
 const {Link} = require('capybara-router');
@@ -17,7 +18,14 @@ module.exports = class FilesPage extends Base {
 	static propTypes = {
 		params: PropTypes.shape({
 			dirname: PropTypes.string,
+			tagId: PropTypes.string,
 		}).isRequired,
+		tags: PropTypes.shape({
+			items: PropTypes.arrayOf(PropTypes.shape({
+				id: PropTypes.number.isRequired,
+				title: PropTypes.string.isRequired,
+			}).isRequired).isRequired,
+		}),
 		files: PropTypes.shape({
 			items: PropTypes.arrayOf(PropTypes.shape({
 				id: PropTypes.number.isRequired,
@@ -25,7 +33,7 @@ module.exports = class FilesPage extends Base {
 				basename: PropTypes.string.isRequired,
 				lastModified: utils.generateDatePropTypes({isRequired: true}),
 				size: PropTypes.number,
-			})).isRequired,
+			}).isRequired).isRequired,
 		}),
 	};
 
@@ -36,17 +44,24 @@ module.exports = class FilesPage extends Base {
 
 		this.state = {
 			fileTable: {...props.files, items: [null, ...props.files.items]},
+			tagTable: {...props.tags},
 			breadcrumb: {
 				items: [
 					{
 						id: Math.random().toString(36),
 						title: S3.BUCKET,
-						urlParams: {dirname: null},
+						urlParams: {
+							tagId: props.params.tagId,
+							dirname: null,
+						},
 					},
 					...folders.map((folder, index) => ({
 						id: Math.random().toString(36),
 						title: folder,
-						urlParams: {dirname: folders.slice(0, index + 1).join('/')},
+						urlParams: {
+							tagId: props.params.tagId,
+							dirname: folders.slice(0, index + 1).join('/'),
+						},
 					})),
 				],
 			},
@@ -103,9 +118,10 @@ module.exports = class FilesPage extends Base {
 	);
 
 	renderFileRow = file => {
+		const {params} = this.props;
 		const generateLinkToParams = file => ({
 			name: 'web.files',
-			params: {dirname: `${file.dirname}${file.basename}`},
+			params: {...params, dirname: `${file.dirname}${file.basename}`},
 		});
 
 		return (
@@ -135,12 +151,45 @@ module.exports = class FilesPage extends Base {
 	};
 
 	render() {
-		const {breadcrumb, fileTable} = this.state;
+		const {params} = this.props;
+		const {breadcrumb, tagTable, fileTable} = this.state;
 
 		return (
 			<div className="container-fluid py-3">
 				<div className="row">
-					<div className="col-12">
+					<div className="d-none d-md-block col-md-4 col-lg-3 col-xl-2">
+						<div className="card">
+							<div className="card-header d-flex justify-content-between">
+								{_('Tags')}
+								<button type="button" className="btn btn-sm btn-outline-secondary" style={{lineHeight: 0}}>
+									{_('Modify')}
+								</button>
+							</div>
+							<div className="list-group list-group-flush">
+								{
+									tagTable.items.length === 0 && (
+										<div className="list-group-item text-muted text-center">{_('Empty')}</div>
+									)
+								}
+								{
+									tagTable.items.map(tag => (
+										<Link
+											key={tag.id}
+											className={classnames(
+												'list-group-item list-group-item-action text-truncate',
+												{active: tag.id === Number(params.tagId)},
+											)}
+											to={{name: 'web.files', params: {...params, tagId: `${tag.id}`}}}
+										>
+											{tag.title}
+										</Link>
+									))
+								}
+							</div>
+						</div>
+					</div>
+
+					<div className="col-12 col-md-8 col-lg-9 col-xl-10">
 						<nav aria-label="breadcrumb">
 							<ol className="breadcrumb">
 								{
@@ -154,14 +203,10 @@ module.exports = class FilesPage extends Base {
 								}
 							</ol>
 						</nav>
-					</div>
-				</div>
 
-				<div className="row files-wrapper">
-					<div className="col-12">
 						{
 							fileTable.items.length === 1 && (
-								<div className="border rounded">
+								<div className="files-wrapper border rounded">
 									{this.filesHeaderComponent}
 									{this.emptyFileRowComponent}
 								</div>
@@ -170,7 +215,7 @@ module.exports = class FilesPage extends Base {
 						{
 							fileTable.items.length > 1 && (
 								<InfiniteScroll
-									className="border rounded"
+									className="files-wrapper border rounded"
 									pageStart={0}
 									loadMore={this.loadNextPage}
 									hasMore={fileTable.hasNextPage}

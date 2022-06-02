@@ -10,4 +10,10 @@ module.exports = {
 			params: {dirname, after, limit},
 		}),
 	},
+	tag: {
+		getTags: () => sendRequest({
+			method: 'get',
+			url: `${BASE_PATH}/tags`,
+		}),
+	},
 };
