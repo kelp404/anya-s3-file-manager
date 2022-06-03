@@ -30,6 +30,8 @@ module.exports = class FilesPage extends Base {
 			items: PropTypes.arrayOf(PropTypes.shape({
 				id: PropTypes.number.isRequired,
 				type: PropTypes.oneOf(Object.values(FILE_TYPE)).isRequired,
+				path: PropTypes.string.isRequired,
+				dirname: PropTypes.string.isRequired,
 				basename: PropTypes.string.isRequired,
 				lastModified: utils.generateDatePropTypes({isRequired: true}),
 				size: PropTypes.number,
