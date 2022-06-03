@@ -1,5 +1,6 @@
 const config = require('config');
 const {Op} = require('sequelize');
+const utils = require('../common/utils');
 const {
 	validateGetFilesQuery,
 } = require('../validators/file-validator');
@@ -24,11 +25,25 @@ exports.getFiles = async (req, res) => {
 	}
 
 	const {
-		dirname = '', after, limit = PAGINATION.DEFAULT_LIMIT,
+		dirname = '', keyword, after, limit = PAGINATION.DEFAULT_LIMIT,
 	} = req.query;
-	const where = {
-		dirname,
-	};
+	const keywordConditions = [];
+	const afterConditions = [];
+
+	if (keyword) {
+		const {plus, minus} = utils.parseKeyword(keyword);
+
+		plus.forEach(plusKeyword => {
+			keywordConditions.push({
+				path: {[Op.like]: utils.generateLikeSyntax(plusKeyword)},
+			});
+		});
+		minus.forEach(minusKeyword => {
+			keywordConditions.push({
+				path: {[Op.notLike]: utils.generateLikeSyntax(minusKeyword)},
+			});
+		});
+	}
 
 	if (after) {
 		const cursor = await FileModel.findOne({
@@ -40,7 +55,7 @@ exports.getFiles = async (req, res) => {
 			throw new Http404(`not found file ${after}`);
 		}
 
-		where[Op.or] = [
+		afterConditions.push(
 			{
 				[Op.and]: [
 					{type: {[Op.gte]: cursor.type}},
@@ -54,11 +69,17 @@ exports.getFiles = async (req, res) => {
 					{id: {[Op.gt]: cursor.id}},
 				],
 			},
-		];
+		);
 	}
 
 	const files = await FileModel.findAll({
-		where,
+		where: {
+			dirname: keywordConditions.length
+				? {[Op.like]: utils.generateLikeSyntax(dirname, {end: ''})}
+				: dirname,
+			...(afterConditions.length ? {[Op.or]: afterConditions} : undefined),
+			...(keywordConditions.length ? {[Op.and]: keywordConditions} : undefined),
+		},
 		order: [
 			['type', 'ASC'],
 			['basename', 'ASC'],

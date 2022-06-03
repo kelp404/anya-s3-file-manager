@@ -18,6 +18,17 @@ function generateIdSchema({fieldName = 'id'} = {}) {
 	};
 }
 
+function generateKeywordSchema({fieldName = 'keyword'} = {}) {
+	return {
+		[fieldName]: {
+			type: 'string',
+			optional: true,
+			trim: true,
+			max: 255,
+		},
+	};
+}
+
 function generateCursorPaginationSchema() {
 	return {
 		after: {
@@ -37,5 +48,6 @@ function generateCursorPaginationSchema() {
 
 module.exports = {
 	generateIdSchema,
+	generateKeywordSchema,
 	generateCursorPaginationSchema,
 };
