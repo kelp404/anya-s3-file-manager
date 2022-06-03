@@ -147,8 +147,16 @@ module.exports = class FilesPage extends Base {
 		const {params} = this.props;
 		const generateLinkToParams = file => ({
 			name: this.currentRoute.name,
-			params: {...params, dirname: `${file.dirname}${file.basename}`},
+			params: {dirname: `${file.dirname}${file.basename}`, keyword: null},
 		});
+		let name = params.dirname
+			? file.path.replace(`${params.dirname}/`, '')
+			: file.path;
+
+		if (file.type === FILE_TYPE.FOLDER) {
+			// Remove "/" at suffix.
+			name = name.slice(0, name.length - 1);
+		}
 
 		return (
 			<div key={file.id} className="file-row d-flex align-items-end border-top">
@@ -162,8 +170,8 @@ module.exports = class FilesPage extends Base {
 				<div className="flex-grow-1 p-2 text-truncate">
 					{
 						file.type === FILE_TYPE.FILE
-							? file.basename
-							: <Link to={generateLinkToParams(file)}>{file.basename}</Link>
+							? name
+							: <Link to={generateLinkToParams(file)}>{name}</Link>
 					}
 				</div>
 				<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
