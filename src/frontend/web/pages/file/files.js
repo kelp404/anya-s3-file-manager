@@ -162,7 +162,7 @@ module.exports = class FilesPage extends Base {
 
 		return (
 			<div key={file.id} className="file-row d-flex align-items-end border-top">
-				<div className="pr-0 py-2 pl-2 text-muted">
+				<div className="pe-0 py-2 ps-2 text-muted">
 					{
 						file.type === FILE_TYPE.FILE
 							? <i className="fa-fw fa-regular fa-file-lines"/>
@@ -179,7 +179,7 @@ module.exports = class FilesPage extends Base {
 				<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
 					{file.type === FILE_TYPE.FILE ? utils.formatDate(file.lastModified) : '-'}
 				</pre>
-				<pre className="p-2 m-0 text-right" style={{minWidth: '86px'}}>
+				<pre className="p-2 m-0 text-end" style={{minWidth: '86px'}}>
 					{file.type === FILE_TYPE.FILE ? utils.formatSize(file.size) : '-'}
 				</pre>
 			</div>
@@ -226,7 +226,8 @@ module.exports = class FilesPage extends Base {
 					</div>
 
 					<div className="col-12 col-md-8 col-lg-9 col-xl-10">
-						<div className="breadcrumb-wrapper d-flex justify-content-between mb-3">
+						<div className="d-flex align-items-center justify-content-between mb-3">
+							{/* Breadcrumb */}
 							<nav>
 								<ol className="breadcrumb mb-0">
 									{
@@ -241,7 +242,8 @@ module.exports = class FilesPage extends Base {
 								</ol>
 							</nav>
 
-							<form className="form-row align-items-center pr-3">
+							{/* Search form */}
+							<form className="form-row align-items-center">
 								<div className="col-auto my-1">
 									<div className="input-group">
 										<input
