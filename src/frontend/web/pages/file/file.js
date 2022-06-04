@@ -81,10 +81,10 @@ module.exports = class FilePage extends Base {
 				</Modal.Body>
 
 				<Modal.Footer>
-					<button type="button" className="btn btn-secondary" onClick={this.onHideModal}>
+					<button type="button" className="btn btn-outline-secondary" onClick={this.onHideModal}>
 						{_('Close')}
 					</button>
-					<button type="button" className="btn btn-primary">
+					<button type="button" className="btn btn-outline-primary">
 						{_('Download')}
 					</button>
 				</Modal.Footer>
