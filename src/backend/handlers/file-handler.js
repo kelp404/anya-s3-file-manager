@@ -100,7 +100,6 @@ exports.getFiles = async (req, res) => {
  */
 exports.getFileInformation = async (req, res) => {
 	const {fileId} = req.params;
-
 	const file = await FileModel.findOne({
 		where: {
 			id: fileId,
@@ -117,4 +116,26 @@ exports.getFileInformation = async (req, res) => {
 		...file.toJSON(),
 		objectHeaders,
 	});
+};
+
+/*
+	GET /api/files/:fileId
+ */
+exports.getFile = async (req, res) => {
+	const {fileId} = req.params;
+	const file = await FileModel.findOne({
+		where: {
+			id: fileId,
+		},
+	});
+
+	if (!file) {
+		throw new Http404();
+	}
+
+	const stream = await s3.getObjectStream(file.path);
+
+	res.set(stream.Body.headers);
+	stream.Body.on('data', data => res.write(data));
+	stream.Body.on('end', () => res.end());
 };
