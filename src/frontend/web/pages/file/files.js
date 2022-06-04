@@ -1,7 +1,7 @@
 const classnames = require('classnames');
 const PropTypes = require('prop-types');
 const React = require('react');
-const {Link, getRouter} = require('capybara-router');
+const {Link, RouterView, getRouter} = require('capybara-router');
 const InfiniteScroll = require('@kelp404/react-infinite-scroller');
 const {
 	FILE_TYPE,
@@ -44,7 +44,7 @@ module.exports = class FilesPage extends Base {
 
 		const folders = props.params.dirname?.split('/') || [];
 
-		this.currentRoute = getRouter().findRouteByName('web.files');
+		this.myRoute = getRouter().findRouteByName('web.files');
 		this.state = {
 			keyword: props.params.keyword || '',
 			fileTable: {...props.files, items: [null, ...props.files.items]},
@@ -82,7 +82,7 @@ module.exports = class FilesPage extends Base {
 	generateChangeFilterHandler = (paramKey, value) => event => {
 		event.preventDefault();
 		getRouter().go({
-			name: this.currentRoute.name,
+			name: this.myRoute.name,
 			params: {
 				...this.props.params,
 				[paramKey]: value === undefined
@@ -147,9 +147,13 @@ module.exports = class FilesPage extends Base {
 
 	renderFileRow = file => {
 		const {params} = this.props;
-		const generateLinkToParams = file => ({
-			name: this.currentRoute.name,
+		const generateFolderLinkToParams = file => ({
+			name: this.myRoute.name,
 			params: {dirname: `${file.dirname}${file.basename}`, keyword: null},
+		});
+		const generateFileLinkToParams = file => ({
+			name: 'web.files.details',
+			params: {...params, fileId: file.id},
 		});
 		let name = params.dirname
 			? file.path.replace(`${params.dirname}/`, '')
@@ -172,8 +176,8 @@ module.exports = class FilesPage extends Base {
 				<div className="flex-grow-1 p-2 text-truncate">
 					{
 						file.type === FILE_TYPE.FILE
-							? name
-							: <Link to={generateLinkToParams(file)}>{name}</Link>
+							? <Link to={generateFileLinkToParams(file)}>{name}</Link>
+							: <Link to={generateFolderLinkToParams(file)}>{name}</Link>
 					}
 				</div>
 				<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
@@ -215,7 +219,7 @@ module.exports = class FilesPage extends Base {
 												'list-group-item list-group-item-action text-truncate',
 												{active: tag.id === Number(params.tagId)},
 											)}
-											to={{name: this.currentRoute.name, params: {...params, tagId: `${tag.id}`}}}
+											to={{name: this.myRoute.name, params: {...params, tagId: `${tag.id}`}}}
 										>
 											{tag.title}
 										</Link>
@@ -233,7 +237,7 @@ module.exports = class FilesPage extends Base {
 									{
 										breadcrumb.items.map(item => (
 											<li key={item.id} className="breadcrumb-item">
-												<Link to={{name: this.currentRoute.name, params: item.urlParams}}>
+												<Link to={{name: this.myRoute.name, params: item.urlParams}}>
 													{item.title}
 												</Link>
 											</li>
@@ -296,6 +300,7 @@ module.exports = class FilesPage extends Base {
 						}
 					</div>
 				</div>
+				<RouterView/>
 			</div>
 		);
 	}

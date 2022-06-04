@@ -31,11 +31,26 @@ router.listen('ChangeStart', (action, toState, fromState, next) => {
 
 	next();
 });
-router.listen('ChangeSuccess', action => {
+router.listen('ChangeSuccess', (action, toState, fromState) => {
 	nprogress.done();
 
 	// Scroll to top.
 	if ([PUSH, REPLACE].includes(action)) {
+		const modalPages = [
+			'web.files.details',
+		];
+
+		if (modalPages.includes(toState.name)) {
+			return;
+		}
+
+		if (
+			(fromState.name === 'web.files.details' && toState.name === 'web.files')
+		) {
+			// From modal pages back to the parent.
+			return;
+		}
+
 		if (typeof window.scrollTo === 'function') {
 			window.scrollTo(0, 0);
 		}

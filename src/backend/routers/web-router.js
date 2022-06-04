@@ -7,6 +7,7 @@ const expressRouter = new ExpressRouter();
 
 expressRouter.get('/', baseHandler.getBaseView);
 expressRouter.get('/files', baseHandler.getBaseView);
+expressRouter.get(/^\/files\/\d+$/, baseHandler.getBaseView);
 
 expressRouter.get('/api/files', fileHandler.getFiles);
 expressRouter.get('/api/files/:fileId(\\d+)/information', fileHandler.getFileInformation);

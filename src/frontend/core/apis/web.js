@@ -9,6 +9,10 @@ module.exports = {
 			url: `${BASE_PATH}/files`,
 			params: {dirname, keyword, after, limit},
 		}),
+		getFileInformation: ({fileId}) => sendRequest({
+			method: 'get',
+			url: `${BASE_PATH}/files/${fileId}/information`,
+		}),
 	},
 	tag: {
 		getTags: () => sendRequest({
