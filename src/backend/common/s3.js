@@ -87,3 +87,10 @@ exports.syncFilesFromS3 = async () => {
 	});
 };
 
+exports.headObject = (path, options) => s3
+	.headObject({
+		...options,
+		Bucket: S3.BUCKET,
+		Key: path,
+	})
+	.promise();

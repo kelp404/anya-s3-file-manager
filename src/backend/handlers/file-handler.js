@@ -1,6 +1,7 @@
 const config = require('config');
 const {Op} = require('sequelize');
 const utils = require('../common/utils');
+const s3 = require('../common/s3');
 const {
 	validateGetFilesQuery,
 } = require('../validators/file-validator');
@@ -91,5 +92,29 @@ exports.getFiles = async (req, res) => {
 	res.json({
 		hasNextPage: files.length > limit,
 		items: files.slice(0, limit),
+	});
+};
+
+/*
+	GET /api/files/:fileId/information
+ */
+exports.getFileInformation = async (req, res) => {
+	const {fileId} = req.params;
+
+	const file = await FileModel.findOne({
+		where: {
+			id: fileId,
+		},
+	});
+
+	if (!file) {
+		throw new Http404();
+	}
+
+	const objectHeaders = await s3.headObject(file.path);
+
+	res.json({
+		...file.toJSON(),
+		objectHeaders,
 	});
 };

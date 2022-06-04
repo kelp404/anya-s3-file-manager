@@ -9,6 +9,7 @@ expressRouter.get('/', baseHandler.getBaseView);
 expressRouter.get('/files', baseHandler.getBaseView);
 
 expressRouter.get('/api/files', fileHandler.getFiles);
+expressRouter.get('/api/files/:fileId(\\d+)/information', fileHandler.getFileInformation);
 expressRouter.get('/api/tags', tagHandler.getTags);
 expressRouter.post('/api/tags', tagHandler.createTag);
 
