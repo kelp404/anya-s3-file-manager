@@ -13,6 +13,10 @@ module.exports = {
 			method: 'get',
 			url: `${BASE_PATH}/files/${fileId}/information`,
 		}),
+		deleteFile: ({fileId}) => sendRequest({
+			method: 'delete',
+			url: `${BASE_PATH}/files/${fileId}`,
+		}),
 	},
 	tag: {
 		getTags: () => sendRequest({

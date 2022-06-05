@@ -12,6 +12,7 @@ expressRouter.get(/^\/files\/\d+$/, baseHandler.getBaseView);
 expressRouter.get('/api/files', fileHandler.getFiles);
 expressRouter.get('/api/files/:fileId(\\d+)', fileHandler.getFile);
 expressRouter.get('/api/files/:fileId(\\d+)/information', fileHandler.getFileInformation);
+expressRouter.delete('/api/files/:fileId(\\d+)', fileHandler.deleteFile);
 expressRouter.get('/api/tags', tagHandler.getTags);
 expressRouter.post('/api/tags', tagHandler.createTag);
 

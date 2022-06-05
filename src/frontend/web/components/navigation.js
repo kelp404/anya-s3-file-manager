@@ -36,7 +36,10 @@ module.exports = class Navigation extends Base {
 						<ul className="navbar-nav me-auto mb-0">
 							<li className="nav-item">
 								<Link
-									className={classnames('nav-link', {active: currentRouteName === 'web.files'})}
+									className={classnames(
+										'nav-link',
+										{active: ['web.files', 'web.files.details'].includes(currentRouteName)},
+									)}
 									to="/files"
 								>
 									{_('Files')}

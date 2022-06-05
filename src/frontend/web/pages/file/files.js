@@ -10,6 +10,10 @@ const api = require('../../../core/apis/web');
 const Loading = require('../../../core/components/loading');
 const Base = require('../../../core/pages/base');
 const utils = require('../../../core/utils');
+const {
+	STORE_KEYS: {DELETED_FILE_NOTIFICATION},
+} = require('../../../core/constants');
+const store = require('../../../core/store');
 const _ = require('../../../languages');
 
 const {S3} = window.config;
@@ -70,6 +74,30 @@ module.exports = class FilesPage extends Base {
 				],
 			},
 		};
+	}
+
+	componentDidMount() {
+		super.componentDidMount();
+		this.$listens.push(
+			store.subscribe(DELETED_FILE_NOTIFICATION, (event, {fileId}) => {
+				this.setState(prevState => {
+					const items = [...prevState.fileTable.items];
+					const index = items.findIndex(file => file?.id === fileId);
+
+					if (index < 0) {
+						return;
+					}
+
+					items.splice(index, 1);
+					return {
+						fileTable: {
+							...prevState.fileTable,
+							items,
+						},
+					};
+				});
+			}),
+		);
 	}
 
 	/**

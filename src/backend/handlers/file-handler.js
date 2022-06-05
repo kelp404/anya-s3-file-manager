@@ -143,3 +143,23 @@ exports.getFile = async (req, res) => {
 	stream.Body.on('data', data => res.write(data));
 	stream.Body.on('end', () => res.end());
 };
+
+/*
+	DELETE /api/files/:fileId
+ */
+exports.deleteFile = async (req, res) => {
+	const {fileId} = req.params;
+	const file = await FileModel.findOne({
+		where: {
+			id: fileId,
+		},
+	});
+
+	if (!file) {
+		throw new Http404();
+	}
+
+	await s3.deleteObjects([file.path]);
+	await file.destroy();
+	res.sendStatus(204);
+};

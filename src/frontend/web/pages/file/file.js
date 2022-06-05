@@ -3,7 +3,12 @@ const PropTypes = require('prop-types');
 const React = require('react');
 const Modal = require('react-bootstrap/Modal').default;
 const Base = require('../../../core/pages/base');
+const api = require('../../../core/apis/web');
 const utils = require('../../../core/utils');
+const {
+	STORE_KEYS: {DELETED_FILE_NOTIFICATION},
+} = require('../../../core/constants');
+const store = require('../../../core/store');
 const _ = require('../../../languages');
 
 module.exports = class FilePage extends Base {
@@ -35,6 +40,21 @@ module.exports = class FilePage extends Base {
 		);
 	}
 
+	onDeleteFile = async () => {
+		try {
+			const {id: fileId} = this.props.file;
+
+			await api.file.deleteFile({fileId});
+			store.broadcast(DELETED_FILE_NOTIFICATION, {fileId});
+			getRouter().go({
+				name: 'web.files',
+				params: this.props.params,
+			});
+		} catch (error) {
+			utils.renderError(error);
+		}
+	};
+
 	onDownloadFile = () => {
 		window.open(`/api/files/${this.props.file.id}`);
 	};
@@ -60,7 +80,7 @@ module.exports = class FilePage extends Base {
 
 	render() {
 		const {file} = this.props;
-		const {isShowModal} = this.state;
+		const {$isApiProcessing, isShowModal} = this.state;
 
 		return (
 			<Modal
@@ -98,6 +118,13 @@ module.exports = class FilePage extends Base {
 				</Modal.Body>
 
 				<Modal.Footer>
+					<button
+						disabled={$isApiProcessing}
+						type="button" className="btn btn-outline-danger"
+						onClick={this.onDeleteFile}
+					>
+						{_('Delete')}
+					</button>
 					<button
 						type="button" className="btn btn-outline-primary"
 						onClick={this.onDownloadFile}

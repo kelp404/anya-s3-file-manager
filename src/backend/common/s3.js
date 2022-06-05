@@ -88,11 +88,27 @@ exports.syncFilesFromS3 = async () => {
 	});
 };
 
+/*
+	https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#headObject-property
+ */
 exports.headObject = (path, options) => s3
 	.headObject({
 		...options,
 		Bucket: S3.BUCKET,
 		Key: path,
+	})
+	.promise();
+
+/*
+	https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#deleteObjects-property
+ */
+exports.deleteObjects = (paths, options) => s3
+	.deleteObjects({
+		Bucket: S3.BUCKET,
+		Delete: {
+			...options,
+			Objects: paths.map(path => ({Key: path})),
+		},
 	})
 	.promise();
 
