@@ -1,4 +1,5 @@
 const config = require('config');
+const contentDisposition = require('content-disposition');
 const {Op} = require('sequelize');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
@@ -135,7 +136,10 @@ exports.getFile = async (req, res) => {
 
 	const stream = await s3.getObjectStream(file.path);
 
-	res.set(stream.Body.headers);
+	res.set({
+		...stream.Body.headers,
+		'Content-Disposition': contentDisposition(file.basename),
+	});
 	stream.Body.on('data', data => res.write(data));
 	stream.Body.on('end', () => res.end());
 };

@@ -35,11 +35,27 @@ module.exports = class FilePage extends Base {
 		);
 	}
 
+	onDownloadFile = () => {
+		window.open(`/api/files/${this.props.file.id}`);
+	};
+
 	onHideModal = () => {
 		getRouter().go({
 			name: 'web.files',
 			params: this.props.params,
 		});
+	};
+
+	renderPreview = file => {
+		const contentType = file.objectHeaders.ContentType;
+
+		if (/^image\//.test(contentType)) {
+			return (
+				<div className="col-12">
+					<img src={`/api/files/${file.id}`} className="rounded mx-auto d-block" style={{maxHeight: '300px'}}/>
+				</div>
+			);
+		}
 	};
 
 	render() {
@@ -59,6 +75,7 @@ module.exports = class FilePage extends Base {
 
 				<Modal.Body>
 					<div className="row">
+						{this.renderPreview(file)}
 						<div className="col-12 mb-2">
 							<strong className="d-block text-secondary mb-0">{_('Path')}</strong>
 							<span>{file.path}</span>
@@ -81,11 +98,18 @@ module.exports = class FilePage extends Base {
 				</Modal.Body>
 
 				<Modal.Footer>
-					<button type="button" className="btn btn-outline-secondary" onClick={this.onHideModal}>
-						{_('Close')}
-					</button>
-					<button type="button" className="btn btn-outline-primary">
+					<button
+						type="button" className="btn btn-outline-primary"
+						onClick={this.onDownloadFile}
+					>
 						{_('Download')}
+					</button>
+					<button
+						autoFocus
+						type="button" className="btn btn-outline-secondary"
+						onClick={this.onHideModal}
+					>
+						{_('Close')}
 					</button>
 				</Modal.Footer>
 			</Modal>
