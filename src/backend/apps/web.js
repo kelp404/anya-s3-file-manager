@@ -5,7 +5,6 @@ const ejs = require('ejs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const nocache = require('nocache');
 const {Http404} = require('../models/errors');
 const webRouter = require('../routers/web-router');
 const {setAssetsHeader, assetsHandler} = require('../middlewares/assets');
@@ -38,7 +37,7 @@ if (IS_LOG_REQUEST) {
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(/^\/assets(?!\/express)/, setAssetsHeader(), assetsHandler());
-app.use(nocache(), webRouter);
+app.use(webRouter);
 
 // Error handlers
 app.use((req, res, next) => {

@@ -108,6 +108,12 @@ exports.parseKeyword = keyword => {
 	return {plus, minus, fields};
 };
 
+exports.setNoCacheHeader = (_, res) => {
+	res.set({
+		'Cache-Control': 'no-store',
+	});
+};
+
 exports.logError = error => {
 	if (IS_LOG_ERROR) {
 		console.error(error);
