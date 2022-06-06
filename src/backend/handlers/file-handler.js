@@ -123,6 +123,9 @@ exports.getFileInformation = async (req, res) => {
 	GET /api/files/:fileId
  */
 exports.getFile = async (req, res) => {
+	const NOT_FORWARD_HEADERS = [
+		'Accept-Ranges',
+	];
 	const {fileId} = req.params;
 	const file = await FileModel.findOne({
 		where: {
@@ -136,10 +139,17 @@ exports.getFile = async (req, res) => {
 
 	const stream = await s3.getObjectStream(file.path);
 
-	res.set({
-		...stream.Body.headers,
-		'Content-Disposition': contentDisposition(file.basename),
-	});
+	for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
+		const key = stream.Body.rawHeaders[index];
+		const value = stream.Body.rawHeaders[index + 1];
+
+		if (NOT_FORWARD_HEADERS.includes(key)) {
+			continue;
+		}
+
+		res.set(key, value);
+	}
+
 	stream.Body.on('data', data => res.write(data));
 	stream.Body.on('end', () => res.end());
 };
