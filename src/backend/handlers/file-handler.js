@@ -139,6 +139,8 @@ exports.getFile = async (req, res) => {
 
 	const stream = await s3.getObjectStream(file.path);
 
+	res.set('Content-Disposition', contentDisposition(file.basename));
+
 	for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
 		const key = stream.Body.rawHeaders[index];
 		const value = stream.Body.rawHeaders[index + 1];
