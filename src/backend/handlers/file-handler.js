@@ -282,7 +282,43 @@ exports.deleteFile = async (req, res) => {
 		throw new Http404();
 	}
 
-	await s3.deleteObjects([file.path]);
-	await file.destroy();
+	if (file.type === FILE_TYPE.FILE) {
+		await s3.deleteObjects([file.path]);
+		await file.destroy();
+	} else {
+		const [files, folders] = await Promise.all([
+			FileModel.findAll({
+				where: {
+					type: FILE_TYPE.FILE,
+					path: {[Op.like]: utils.generateLikeSyntax(file.path, {start: ''})},
+				},
+			}),
+			FileModel.findAll({
+				where: {
+					type: FILE_TYPE.FOLDER,
+					path: {[Op.like]: utils.generateLikeSyntax(file.path, {start: ''})},
+				},
+			}),
+		]);
+
+		if (files.length) {
+			await s3.deleteObjects(files.map(file => file.path));
+			await FileModel.destroy({
+				where: {id: {[Op.in]: files.map(file => file.id)}},
+			});
+		}
+
+		if (folders.length) {
+			await s3.deleteObjects(
+				folders
+					.map(folder => folder.path)
+					.sort((a, b) => b.split('/').length - a.split('/').length),
+			);
+			await FileModel.destroy({
+				where: {id: {[Op.in]: folders.map(folder => folder.id)}},
+			});
+		}
+	}
+
 	res.sendStatus(204);
 };
