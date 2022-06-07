@@ -214,6 +214,11 @@ exports.downloadFiles = async (req, res) => {
 	await archiveFilesAndDownload({files, res});
 };
 
+/**
+ * @param {Array<FileModel>} files
+ * @param {ServerResponse} res
+ * @returns {Promise<void>}
+ */
 async function archiveFilesAndDownload({files, res}) {
 	const limit = pLimit(1);
 	const folderNames = Array.from(new Set(files.map(file => file.dirname || S3.BUCKET)));
