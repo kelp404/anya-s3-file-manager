@@ -4,6 +4,9 @@ const config = require('config');
 const contentDisposition = require('content-disposition');
 const pLimit = require('p-limit');
 const {Op} = require('sequelize');
+const {
+	FILE_TYPE,
+} = require('../../shared/constants');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
 const {
@@ -163,24 +166,42 @@ exports.downloadFile = async (req, res) => {
 	GET /api/files/:fileIds
  */
 exports.downloadFiles = async (req, res) => {
-	const fileIds = Array.from(new Set(req.params[0].split(',').map(Number)));
-	const files = await FileModel.findAll({
+	const dbQueryLimit = pLimit(4);
+	const s3StreamLimit = pLimit(1);
+	const fileOrFolderIds = Array.from(new Set(req.params[0].split(',').map(Number)));
+	const files = [];
+	const filesAndFolders = await FileModel.findAll({
 		where: {
-			id: {[Op.in]: fileIds},
+			id: {[Op.in]: fileOrFolderIds},
 		},
 	});
 
-	if (files.length !== fileIds) {
-		const existsFileIds = files.map(file => file.id);
+	if (filesAndFolders.length !== fileOrFolderIds.length) {
+		const existsIds = filesAndFolders.map(({id}) => id);
 
-		fileIds.forEach(fileId => {
-			if (!existsFileIds.includes(fileId)) {
-				throw new Http404(`not found "${fileId}"`);
+		fileOrFolderIds.forEach(id => {
+			if (!existsIds.includes(id)) {
+				throw new Http404(`not found "${id}"`);
 			}
 		});
 	}
 
-	const limit = pLimit(1);
+	await Promise.all(filesAndFolders.map(fileOrFolder => dbQueryLimit(async () => {
+		if (fileOrFolder.type === FILE_TYPE.FILE) {
+			files.push(fileOrFolder);
+			return;
+		}
+
+		const deepFiles = await FileModel.findAll({
+			where: {
+				path: {[Op.like]: utils.generateLikeSyntax(fileOrFolder.path, {start: ''})},
+				type: FILE_TYPE.FILE,
+			},
+		});
+
+		files.push(...deepFiles);
+	})));
+
 	const folderNames = Array.from(new Set(files.map(file => file.dirname || S3.BUCKET)));
 	const isAllFilesInSameFolder = folderNames.length === 1;
 	const archive = archiver('zip', {zlib: {level: 1}});
@@ -199,7 +220,7 @@ exports.downloadFiles = async (req, res) => {
 	});
 	archive.pipe(res);
 
-	await Promise.all(files.map(file => limit(async () => {
+	await Promise.all(files.map(file => s3StreamLimit(async () => {
 		const filename = isAllFilesInSameFolder ? file.basename : file.path;
 		let filenameInZip = filename;
 		const stream = await s3.getObjectStream(file.path);
