@@ -53,6 +53,7 @@ module.exports = class FilePage extends Base {
 				params: this.props.params,
 			});
 		} catch (error) {
+			nprogress.done();
 			utils.renderError(error);
 		}
 	};
