@@ -80,7 +80,7 @@ exports.getFiles = async (req, res) => {
 	const files = await FileModel.findAll({
 		where: {
 			dirname: keywordConditions.length
-				? {[Op.like]: utils.generateLikeSyntax(dirname, {end: ''})}
+				? {[Op.like]: utils.generateLikeSyntax(dirname, {start: ''})}
 				: dirname,
 			...(afterConditions.length ? {[Op.or]: afterConditions} : undefined),
 			...(keywordConditions.length ? {[Op.and]: keywordConditions} : undefined),
