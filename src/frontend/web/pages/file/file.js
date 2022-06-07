@@ -46,7 +46,7 @@ module.exports = class FilePage extends Base {
 			const {id: fileId} = this.props.file;
 
 			nprogress.start();
-			await api.file.deleteFile({fileId});
+			await api.file.deleteFiles({fileIds: [fileId]});
 			store.broadcast(DELETED_FILE_NOTIFICATION, {fileId});
 			getRouter().go({
 				name: 'web.files',

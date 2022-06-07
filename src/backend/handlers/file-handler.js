@@ -11,6 +11,7 @@ const utils = require('../common/utils');
 const s3 = require('../common/s3');
 const {
 	validateGetFilesQuery,
+	validateDeleteFilesQuery,
 } = require('../validators/file-validator');
 const FileModel = require('../models/data/file-model');
 const {
@@ -177,7 +178,7 @@ exports.downloadFile = async (req, res) => {
 	GET /api/files/:fileIds
  */
 exports.downloadFiles = async (req, res) => {
-	const limit = pLimit(4);
+	const limit = pLimit(1);
 	const fileOrFolderIds = Array.from(new Set(req.params[0].split(',').map(Number)));
 	const files = [];
 	const filesAndFolders = await FileModel.findAll({
@@ -273,56 +274,75 @@ async function archiveFilesAndDownload({files, res}) {
 }
 
 /*
-	DELETE /api/files/:fileId
+	DELETE /api/files
  */
-exports.deleteFile = async (req, res) => {
-	const {fileId} = req.params;
-	const file = await FileModel.findOne({
+exports.deleteFiles = async (req, res) => {
+	const checkResult = validateDeleteFilesQuery(req.query);
+
+	if (checkResult !== true) {
+		throw new Http422('form validation failed', checkResult);
+	}
+
+	const {ids} = req.query;
+	const limit = pLimit(1);
+	const files = [];
+	const folders = [];
+	const filesAndFolders = await FileModel.findAll({
 		where: {
-			id: fileId,
+			id: {[Op.in]: ids},
 		},
 	});
 
-	if (!file) {
-		throw new Http404();
+	if (filesAndFolders.length !== ids.length) {
+		const existsIds = filesAndFolders.map(({id}) => id);
+
+		ids.forEach(id => {
+			if (!existsIds.includes(id)) {
+				throw new Http404(`not found "${id}"`);
+			}
+		});
 	}
 
-	if (file.type === FILE_TYPE.FILE) {
-		await s3.deleteObjects([file.path]);
-		await file.destroy();
-	} else {
-		const [files, folders] = await Promise.all([
-			FileModel.findAll({
-				where: {
-					type: FILE_TYPE.FILE,
-					path: {[Op.like]: utils.generateLikeSyntax(file.path, {start: ''})},
-				},
-			}),
-			FileModel.findAll({
-				where: {
-					type: FILE_TYPE.FOLDER,
-					path: {[Op.like]: utils.generateLikeSyntax(file.path, {start: ''})},
-				},
-			}),
-		]);
+	await Promise.all(filesAndFolders.map(fileOrFolder => limit(async () => {
+		if (fileOrFolder.type === FILE_TYPE.FILE) {
+			files.push(fileOrFolder);
+		} else {
+			const [deepFiles, deepFolders] = await Promise.all([
+				FileModel.findAll({
+					where: {
+						type: FILE_TYPE.FILE,
+						path: {[Op.like]: utils.generateLikeSyntax(fileOrFolder.path, {start: ''})},
+					},
+				}),
+				FileModel.findAll({
+					where: {
+						type: FILE_TYPE.FOLDER,
+						path: {[Op.like]: utils.generateLikeSyntax(fileOrFolder.path, {start: ''})},
+					},
+				}),
+			]);
 
-		if (files.length) {
-			await s3.deleteObjects(files.map(file => file.path));
-			await FileModel.destroy({
-				where: {id: {[Op.in]: files.map(file => file.id)}},
-			});
+			files.push(...deepFiles);
+			folders.push(...deepFolders);
 		}
+	})));
 
-		if (folders.length) {
-			await s3.deleteObjects(
-				folders
-					.map(folder => folder.path)
-					.sort((a, b) => b.split('/').length - a.split('/').length),
-			);
-			await FileModel.destroy({
-				where: {id: {[Op.in]: folders.map(folder => folder.id)}},
-			});
-		}
+	if (files.length) {
+		await s3.deleteObjects(files.map(file => file.path));
+		await FileModel.destroy({
+			where: {id: {[Op.in]: files.map(file => file.id)}},
+		});
+	}
+
+	if (folders.length) {
+		await s3.deleteObjects(
+			folders
+				.map(folder => folder.path)
+				.sort((a, b) => b.split('/').length - a.split('/').length),
+		);
+		await FileModel.destroy({
+			where: {id: {[Op.in]: folders.map(folder => folder.id)}},
+		});
 	}
 
 	res.sendStatus(204);
