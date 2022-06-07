@@ -1,0 +1,11 @@
+a, .btn-link {
+  text-decoration: none;
+
+  &:hover, &.active, &:focus {
+    text-decoration: underline;
+  }
+}
+
+nav.navbar {
+  opacity: 0.97;
+}
