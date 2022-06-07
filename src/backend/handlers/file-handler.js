@@ -1,5 +1,8 @@
+const path = require('path');
+const archiver = require('archiver');
 const config = require('config');
 const contentDisposition = require('content-disposition');
+const pLimit = require('p-limit');
 const {Op} = require('sequelize');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
@@ -13,7 +16,7 @@ const {
 } = require('../models/errors');
 
 const {
-	PAGINATION,
+	PAGINATION, S3,
 } = config;
 
 /*
@@ -154,6 +157,79 @@ exports.downloadFile = async (req, res) => {
 
 	stream.Body.on('data', data => res.write(data));
 	stream.Body.on('end', () => res.end());
+};
+
+/*
+	GET /api/files/:fileIds
+ */
+exports.downloadFiles = async (req, res) => {
+	const fileIds = Array.from(new Set(req.params[0].split(',').map(Number)));
+	const files = await FileModel.findAll({
+		where: {
+			id: {[Op.in]: fileIds},
+		},
+	});
+
+	if (files.length !== fileIds) {
+		const existsFileIds = files.map(file => file.id);
+
+		fileIds.forEach(fileId => {
+			if (!existsFileIds.includes(fileId)) {
+				throw new Http404(`not found "${fileId}"`);
+			}
+		});
+	}
+
+	const limit = pLimit(1);
+	const folderNames = Array.from(new Set(files.map(file => file.dirname || S3.BUCKET)));
+	const isAllFilesInSameFolder = folderNames.length === 1;
+	const archive = archiver('zip', {zlib: {level: 1}});
+	const zipFilenameTable = {};
+	const isFilenameExists = name => name.toLowerCase() in zipFilenameTable;
+	const getNextFilenameIndex = name => ++zipFilenameTable[name.toLowerCase()];
+	const initFilenameIndex = name => {
+		zipFilenameTable[name.toLowerCase()] = 0;
+	};
+
+	res.set({
+		'Content-Type': 'application/zip',
+		'Content-disposition': isAllFilesInSameFolder
+			? contentDisposition(`${folderNames[0]}.zip`)
+			: contentDisposition('download.zip'),
+	});
+	archive.pipe(res);
+
+	await Promise.all(files.map(file => limit(async () => {
+		const filename = isAllFilesInSameFolder ? file.basename : file.path;
+		let filenameInZip = filename;
+		const stream = await s3.getObjectStream(file.path);
+
+		if (isFilenameExists(filename)) {
+			const extname = path.extname(filename);
+
+			do {
+				const filenameIndex = getNextFilenameIndex(filename);
+
+				if (extname) {
+					filenameInZip = [
+						filename.replace(new RegExp(`\\${extname}$`), ''),
+						` (${filenameIndex})`,
+						extname,
+					].join('');
+				} else {
+					filenameInZip = `${filename} (${filenameIndex})`;
+				}
+			} while (isFilenameExists(filenameInZip));
+		} else {
+			initFilenameIndex(filename);
+		}
+
+		archive.append(stream.Body, {name: filenameInZip});
+		return new Promise(resolve => {
+			stream.Body.on('end', resolve);
+		});
+	})));
+	archive.finalize();
 };
 
 /*

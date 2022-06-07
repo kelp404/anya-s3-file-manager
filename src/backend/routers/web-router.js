@@ -12,6 +12,7 @@ expressRouter.get(/^\/files\/\d+$/, setNoCacheHeader, baseHandler.getBaseView);
 
 expressRouter.get('/api/files', setNoCacheHeader, fileHandler.getFiles);
 expressRouter.get('/api/files/:fileId(\\d+)', fileHandler.downloadFile);
+expressRouter.get(/^\/api\/files\/(\d+(?:,\d+)+)$/i, fileHandler.downloadFiles);
 expressRouter.get('/api/files/:fileId(\\d+)/information', setNoCacheHeader, fileHandler.getFileInformation);
 expressRouter.delete('/api/files/:fileId(\\d+)', fileHandler.deleteFile);
 expressRouter.get('/api/tags', tagHandler.getTags);
