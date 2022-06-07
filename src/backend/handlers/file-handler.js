@@ -143,31 +143,41 @@ exports.downloadFile = async (req, res) => {
 		throw new Http404();
 	}
 
-	const stream = await s3.getObjectStream(file.path);
+	if (file.type === FILE_TYPE.FILE) {
+		const stream = await s3.getObjectStream(file.path);
 
-	res.set('Content-Disposition', contentDisposition(file.basename));
+		res.set('Content-Disposition', contentDisposition(file.basename));
 
-	for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
-		const key = stream.Body.rawHeaders[index];
-		const value = stream.Body.rawHeaders[index + 1];
+		for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
+			const key = stream.Body.rawHeaders[index];
+			const value = stream.Body.rawHeaders[index + 1];
 
-		if (NOT_FORWARD_HEADERS.includes(key)) {
-			continue;
+			if (NOT_FORWARD_HEADERS.includes(key)) {
+				continue;
+			}
+
+			res.set(key, value);
 		}
 
-		res.set(key, value);
-	}
+		stream.Body.on('data', data => res.write(data));
+		stream.Body.on('end', () => res.end());
+	} else {
+		const files = await FileModel.findAll({
+			where: {
+				path: {[Op.like]: utils.generateLikeSyntax(file.path, {start: ''})},
+				type: FILE_TYPE.FILE,
+			},
+		});
 
-	stream.Body.on('data', data => res.write(data));
-	stream.Body.on('end', () => res.end());
+		await archiveFilesAndDownload({files, res});
+	}
 };
 
 /*
 	GET /api/files/:fileIds
  */
 exports.downloadFiles = async (req, res) => {
-	const dbQueryLimit = pLimit(4);
-	const s3StreamLimit = pLimit(1);
+	const limit = pLimit(4);
 	const fileOrFolderIds = Array.from(new Set(req.params[0].split(',').map(Number)));
 	const files = [];
 	const filesAndFolders = await FileModel.findAll({
@@ -186,7 +196,7 @@ exports.downloadFiles = async (req, res) => {
 		});
 	}
 
-	await Promise.all(filesAndFolders.map(fileOrFolder => dbQueryLimit(async () => {
+	await Promise.all(filesAndFolders.map(fileOrFolder => limit(async () => {
 		if (fileOrFolder.type === FILE_TYPE.FILE) {
 			files.push(fileOrFolder);
 			return;
@@ -201,7 +211,11 @@ exports.downloadFiles = async (req, res) => {
 
 		files.push(...deepFiles);
 	})));
+	await archiveFilesAndDownload({files, res});
+};
 
+async function archiveFilesAndDownload({files, res}) {
+	const limit = pLimit(1);
 	const folderNames = Array.from(new Set(files.map(file => file.dirname || S3.BUCKET)));
 	const isAllFilesInSameFolder = folderNames.length === 1;
 	const archive = archiver('zip', {zlib: {level: 1}});
@@ -220,7 +234,7 @@ exports.downloadFiles = async (req, res) => {
 	});
 	archive.pipe(res);
 
-	await Promise.all(files.map(file => s3StreamLimit(async () => {
+	await Promise.all(files.map(file => limit(async () => {
 		const filename = isAllFilesInSameFolder ? file.basename : file.path;
 		let filenameInZip = filename;
 		const stream = await s3.getObjectStream(file.path);
@@ -251,7 +265,7 @@ exports.downloadFiles = async (req, res) => {
 		});
 	})));
 	archive.finalize();
-};
+}
 
 /*
 	DELETE /api/files/:fileId
