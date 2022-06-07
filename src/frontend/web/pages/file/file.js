@@ -1,4 +1,5 @@
 const {getRouter} = require('capybara-router');
+const nprogress = require('nprogress');
 const PropTypes = require('prop-types');
 const React = require('react');
 const Modal = require('react-bootstrap/Modal').default;
@@ -44,6 +45,7 @@ module.exports = class FilePage extends Base {
 		try {
 			const {id: fileId} = this.props.file;
 
+			nprogress.start();
 			await api.file.deleteFile({fileId});
 			store.broadcast(DELETED_FILE_NOTIFICATION, {fileId});
 			getRouter().go({
