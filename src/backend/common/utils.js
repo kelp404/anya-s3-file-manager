@@ -50,7 +50,7 @@ exports.generateLikeSyntax = (value, {start = '%', end = '%'} = {}) => {
 	const items = [
 		escapedValue.slice(0, 1),
 		start,
-		escapedValue.slice(1, escapedValue.length - 1).replace(/(%|_)/g, '\\$1'),
+		escapedValue.slice(1, -1).replace(/(%|_)/g, '\\$1'),
 		end,
 		escapedValue.slice(-1),
 		' ESCAPE \'\\\'',

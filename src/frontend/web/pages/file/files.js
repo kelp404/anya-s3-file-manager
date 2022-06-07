@@ -189,7 +189,7 @@ module.exports = class FilesPage extends Base {
 
 		if (file.type === FILE_TYPE.FOLDER) {
 			// Remove "/" at suffix.
-			name = name.slice(0, name.length - 1);
+			name = name.slice(0, -1);
 		}
 
 		return (
