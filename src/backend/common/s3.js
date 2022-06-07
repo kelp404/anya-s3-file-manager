@@ -56,24 +56,51 @@ exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
 exports.syncFilesFromS3 = async () => {
 	const start = new Date();
 	const scanObjects = async continuationToken => {
+		const pathSet = new Set();
 		const result = await s3
 			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken})
 			.promise();
+		const convertS3ObjectToFile = ({Key, Size, LastModified}) => {
+			const dirname = path.dirname(Key);
+
+			return {
+				type: Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
+				path: Key,
+				dirname: dirname === '.' ? '' : dirname,
+				basename: path.basename(Key),
+				lastModified: LastModified,
+				size: Size,
+			};
+		};
 
 		await Promise.all([
 			FileModel.bulkCreate(
-				result.Contents.map(content => {
-					const dirname = path.dirname(content.Key);
+				result.Contents
+					.map(content => {
+						const pieces = content.Key.split('/').slice(0, -1);
+						const file = convertS3ObjectToFile(content);
 
-					return {
-						type: content.Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
-						path: content.Key,
-						dirname: dirname === '.' ? '' : dirname,
-						basename: path.basename(content.Key),
-						lastModified: content.LastModified,
-						size: content.Size,
-					};
-				}),
+						return [
+							file,
+							...pieces.map((piece, index) => convertS3ObjectToFile({
+								Key: `${pieces.slice(0, index + 1).join('/')}/`,
+							})),
+						];
+					})
+					.flat()
+					.filter(file => {
+						if (file.type === FILE_TYPE.FILE) {
+							pathSet.add(file.path);
+							return true;
+						}
+
+						if (pathSet.has(file.path)) {
+							return false;
+						}
+
+						pathSet.add(file.path);
+						return true;
+					}),
 				{updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt']},
 			),
 			result.NextContinuationToken ? scanObjects(result.NextContinuationToken) : null,

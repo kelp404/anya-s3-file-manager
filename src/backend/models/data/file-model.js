@@ -40,11 +40,12 @@ const attributes = {
 	},
 	lastModified: {
 		type: DataTypes.DATE,
-		allowNull: false,
+		allowNull: true,
 	},
 	size: {
 		type: DataTypes.BIGINT,
 		allowNull: false,
+		defaultValue: 0,
 	},
 };
 const options = {

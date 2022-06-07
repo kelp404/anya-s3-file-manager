@@ -37,7 +37,7 @@ module.exports = class FilesPage extends Base {
 				path: PropTypes.string.isRequired,
 				dirname: PropTypes.string.isRequired,
 				basename: PropTypes.string.isRequired,
-				lastModified: utils.generateDatePropTypes({isRequired: true}),
+				lastModified: utils.generateDatePropTypes({isRequired: false}),
 				size: PropTypes.number,
 			}).isRequired).isRequired,
 		}),
