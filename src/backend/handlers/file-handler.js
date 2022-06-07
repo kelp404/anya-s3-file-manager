@@ -194,7 +194,7 @@ exports.downloadFiles = async (req, res) => {
 	res.set({
 		'Content-Type': 'application/zip',
 		'Content-disposition': isAllFilesInSameFolder
-			? contentDisposition(`${folderNames[0]}.zip`)
+			? contentDisposition(`${folderNames[0].split(path.sep).slice(-1)}.zip`)
 			: contentDisposition('download.zip'),
 	});
 	archive.pipe(res);
