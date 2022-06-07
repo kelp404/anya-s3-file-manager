@@ -122,7 +122,7 @@ exports.getFileInformation = async (req, res) => {
 /*
 	GET /api/files/:fileId
  */
-exports.getFile = async (req, res) => {
+exports.downloadFile = async (req, res) => {
 	const NOT_FORWARD_HEADERS = [
 		'Accept-Ranges',
 	];
