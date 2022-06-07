@@ -289,15 +289,13 @@ module.exports = class FilesPage extends Base {
 											value={keyword}
 											onChange={this.onChangeKeyword}
 										/>
-										<div className="input-group-append">
-											<button
-												className="btn btn-outline-secondary"
-												type="submit"
-												onClick={this.generateChangeFilterHandler('keyword', keyword || null)}
-											>
-												{_('Search')}
-											</button>
-										</div>
+										<button
+											className="btn btn-outline-secondary"
+											type="submit"
+											onClick={this.generateChangeFilterHandler('keyword', keyword || null)}
+										>
+											{_('Search')}
+										</button>
 									</div>
 								</div>
 							</form>
