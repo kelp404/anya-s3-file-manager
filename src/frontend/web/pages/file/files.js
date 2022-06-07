@@ -177,7 +177,10 @@ module.exports = class FilesPage extends Base {
 		const {params} = this.props;
 		const generateFolderLinkToParams = file => ({
 			name: this.myRoute.name,
-			params: {dirname: `${file.dirname}${file.basename}`, keyword: null},
+			params: {
+				dirname: file.dirname ? `${file.dirname}/${file.basename}` : file.basename,
+				keyword: null,
+			},
 		});
 		const generateFileLinkToParams = file => ({
 			name: 'web.files.details',
