@@ -57,6 +57,18 @@ module.exports = new Router({
 			),
 		},
 		{
+			name: 'web.files.uploader',
+			uri: '/uploader',
+			dismissalDelay: 300,
+			onEnter() {
+				document.title = `${_('Upload')} - ${webTitle}`;
+			},
+			loadComponent: () => import(
+				/* webpackChunkName: "web-uploader" */
+				'./pages/file/uploader'
+			),
+		},
+		{
 			name: 'not-found',
 			uri: '.*',
 			component: require('./pages/shared/not-found'),

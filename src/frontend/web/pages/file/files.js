@@ -209,6 +209,13 @@ module.exports = class FilesPage extends Base {
 		}
 	};
 
+	onShowUploader = () => {
+		getRouter().go({
+			name: 'web.files.uploader',
+			params: this.props.params,
+		});
+	};
+
 	onLoadNextPage = async () => {
 		try {
 			const {fileTable} = this.state;
@@ -409,23 +416,35 @@ module.exports = class FilesPage extends Base {
 						</div>
 
 						<div className="card">
-							<div className="card-header px-2">
-								<button
-									type="button" className="btn btn-sm btn-outline-danger"
-									style={{lineHeight: 'initial'}}
-									disabled={$isApiProcessing || !hasAnyChecked}
-									onClick={this.onDeleteFiles}
-								>
-									{_('Delete')}
-								</button>
-								<button
-									type="button" className="btn btn-sm btn-outline-primary ms-2"
-									style={{lineHeight: 'initial'}}
-									disabled={$isApiProcessing || !hasAnyChecked}
-									onClick={this.onDownloadFiles}
-								>
-									{_('Download')}
-								</button>
+							<div className="card-header px-2 d-flex justify-content-between">
+								<div>
+									<button
+										type="button" className="btn btn-sm btn-outline-danger"
+										style={{lineHeight: 'initial'}}
+										disabled={$isApiProcessing || !hasAnyChecked}
+										onClick={this.onDeleteFiles}
+									>
+										{_('Delete')}
+									</button>
+									<button
+										type="button" className="btn btn-sm btn-outline-primary ms-2"
+										style={{lineHeight: 'initial'}}
+										disabled={$isApiProcessing || !hasAnyChecked}
+										onClick={this.onDownloadFiles}
+									>
+										{_('Download')}
+									</button>
+								</div>
+								<div>
+									<button
+										type="button" className="btn btn-sm btn-outline-success ms-2"
+										style={{lineHeight: 'initial'}}
+										disabled={$isApiProcessing}
+										onClick={this.onShowUploader}
+									>
+										{_('Upload')}
+									</button>
+								</div>
 							</div>
 
 							{
