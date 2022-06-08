@@ -122,6 +122,12 @@ module.exports = class FilePage extends Base {
 
 				<Modal.Footer>
 					<button
+						type="button" className="btn btn-outline-secondary"
+						onClick={this.onHideModal}
+					>
+						{_('Close')}
+					</button>
+					<button
 						disabled={$isApiProcessing}
 						type="button" className="btn btn-outline-danger"
 						onClick={this.onDeleteFile}
@@ -129,17 +135,11 @@ module.exports = class FilePage extends Base {
 						{_('Delete')}
 					</button>
 					<button
+						autoFocus
 						type="button" className="btn btn-outline-primary"
 						onClick={this.onDownloadFile}
 					>
 						{_('Download')}
-					</button>
-					<button
-						autoFocus
-						type="button" className="btn btn-outline-secondary"
-						onClick={this.onHideModal}
-					>
-						{_('Close')}
 					</button>
 				</Modal.Footer>
 			</Modal>
