@@ -59,7 +59,7 @@ module.exports = class FilePage extends Base {
 	};
 
 	onDownloadFile = () => {
-		window.open(`/api/files/${this.props.file.id}`);
+		window.open(`/api/files/${this.props.file.id}`, '_blank');
 	};
 
 	onHideModal = () => {
