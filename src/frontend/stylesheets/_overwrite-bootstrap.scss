@@ -9,3 +9,12 @@ a, .btn-link {
 nav.navbar {
   opacity: 0.97;
 }
+
+.form-check {
+  @extend .d-flex, .align-items-center, .mb-0;
+  input[type=checkbox] {
+    width: 18px;
+    height: 18px;
+    @extend .mt-0;
+  }
+}

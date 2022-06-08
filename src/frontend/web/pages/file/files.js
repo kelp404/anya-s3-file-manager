@@ -51,6 +51,7 @@ module.exports = class FilesPage extends Base {
 		this.myRoute = getRouter().findRouteByName('web.files');
 		this.state = {
 			keyword: props.params.keyword || '',
+			checked: Object.fromEntries(props.files.items.map(file => [file.id, false])),
 			fileTable: {...props.files, items: [null, ...props.files.items]},
 			tagTable: {...props.tags},
 			breadcrumb: {
@@ -88,8 +89,12 @@ module.exports = class FilesPage extends Base {
 						return;
 					}
 
+					const nextChecked = {...prevState.checked};
+
+					delete nextChecked[fileId];
 					items.splice(index, 1);
 					return {
+						checked: nextChecked,
 						fileTable: {
 							...prevState.fileTable,
 							items,
@@ -124,6 +129,27 @@ module.exports = class FilesPage extends Base {
 		this.setState({keyword: event.target.value});
 	};
 
+	onChangeCheckAll = event => {
+		const {fileTable} = this.state;
+
+		this.setState({
+			checked: Object.fromEntries(
+				fileTable.items.slice(1).map(file => [file.id, Boolean(event.target.checked)]),
+			),
+		});
+	};
+
+	onChangeCheckFile = event => {
+		const {fileId} = event.target.dataset;
+
+		this.setState(prevState => ({
+			checked: {
+				...prevState.checked,
+				[fileId]: !prevState.checked[fileId],
+			},
+		}));
+	};
+
 	loadNextPage = async () => {
 		try {
 			const {fileTable} = this.state;
@@ -135,6 +161,10 @@ module.exports = class FilesPage extends Base {
 			return new Promise(resolve => {
 				this.setState(
 					prevState => ({
+						checked: {
+							...prevState.checked,
+							...Object.fromEntries(response.data.items.map(file => [file.id, false])),
+						},
 						fileTable: {
 							...response.data,
 							items: [
@@ -156,14 +186,19 @@ module.exports = class FilesPage extends Base {
 	);
 
 	filesHeaderComponent = (
-		<div key={0} className="d-flex align-items-end">
-			<div className="flex-grow-1 p-2 text-truncate">
+		<div key={0} className="d-flex align-items-end px-1">
+			<div className="py-2 px-1">
+				<div className="form-check">
+					<input className="form-check-input" type="checkbox" onChange={this.onChangeCheckAll}/>
+				</div>
+			</div>
+			<div className="flex-grow-1 py-2 px-1 text-truncate">
 				<strong>{_('Name')}</strong>
 			</div>
-			<div className="p-2 text-truncate" style={{minWidth: '270px'}}>
+			<div className="py-2 px-1 text-truncate" style={{minWidth: '270px'}}>
 				<strong>{_('Last modified')}</strong>
 			</div>
-			<div className="p-2" style={{minWidth: '86px'}}>
+			<div className="py-2 px-1" style={{minWidth: '86px'}}>
 				<strong>{_('Size')}</strong>
 			</div>
 		</div>
@@ -175,6 +210,7 @@ module.exports = class FilesPage extends Base {
 
 	renderFileRow = file => {
 		const {params} = this.props;
+		const {checked} = this.state;
 		const generateFolderLinkToParams = file => ({
 			name: this.myRoute.name,
 			params: {
@@ -196,25 +232,36 @@ module.exports = class FilesPage extends Base {
 		}
 
 		return (
-			<div key={file.id} className="file-row d-flex align-items-end border-top">
-				<div className="pe-0 py-2 ps-2 text-muted">
+			<div key={file.id} className="file-row d-flex align-items-end border-top px-1">
+				<div className="py-2 px-1">
+					<div className="form-check">
+						<input
+							data-file-id={file.id}
+							className="form-check-input"
+							type="checkbox"
+							checked={checked[file.id]}
+							onChange={this.onChangeCheckFile}
+						/>
+					</div>
+				</div>
+				<div className="py-2 px-1 text-muted">
 					{
 						file.type === FILE_TYPE.FILE
 							? <i className="fa-fw fa-regular fa-file-lines"/>
 							: <i className="fa-fw fa-regular fa-folder"/>
 					}
 				</div>
-				<div className="flex-grow-1 p-2 text-truncate">
+				<div className="flex-grow-1 py-2 px-1 text-truncate">
 					{
 						file.type === FILE_TYPE.FILE
 							? <Link to={generateFileLinkToParams(file)}>{name}</Link>
 							: <Link to={generateFolderLinkToParams(file)}>{name}</Link>
 					}
 				</div>
-				<pre className="p-2 m-0 text-truncate" style={{minWidth: '270px'}}>
+				<pre className="py-2 px-1 m-0 text-truncate" style={{minWidth: '270px'}}>
 					{file.type === FILE_TYPE.FILE ? utils.formatDate(file.lastModified) : '-'}
 				</pre>
-				<pre className="p-2 m-0 text-end" style={{minWidth: '86px'}}>
+				<pre className="py-2 px-1 m-0 text-end" style={{minWidth: '86px'}}>
 					{file.type === FILE_TYPE.FILE ? utils.formatSize(file.size) : '-'}
 				</pre>
 			</div>
@@ -301,32 +348,39 @@ module.exports = class FilesPage extends Base {
 							</form>
 						</div>
 
-						{
-							fileTable.items.length === 1 && (
-								<div className="files-wrapper border rounded">
-									{this.filesHeaderComponent}
-									{this.emptyFileRowComponent}
-								</div>
-							)
-						}
-						{
-							fileTable.items.length > 1 && (
-								<InfiniteScroll
-									className="files-wrapper border rounded"
-									pageStart={0}
-									loadMore={this.loadNextPage}
-									hasMore={fileTable.hasNextPage}
-									loader={this.infiniteScrollLoadingComponent}
-								>
-									{
-										fileTable.items.map((file, index) => index === 0
-											? this.filesHeaderComponent
-											: this.renderFileRow(file),
-										)
-									}
-								</InfiniteScroll>
-							)
-						}
+						<div className="card">
+							<div className="card-header px-2">
+								<button type="button" className="btn btn-sm btn-outline-danger" style={{lineHeight: 'initial'}}>
+									{_('Delete')}
+								</button>
+								<button type="button" className="btn btn-sm btn-outline-primary ms-2" style={{lineHeight: 'initial'}}>
+									{_('Download')}
+								</button>
+							</div>
+
+							{
+								fileTable.items.length === 1 && (
+									<div className="files-wrapper">
+										{this.filesHeaderComponent}
+										{this.emptyFileRowComponent}
+									</div>
+								)
+							}
+							{
+								fileTable.items.length > 1 && (
+									<InfiniteScroll
+										className="files-wrapper"
+										pageStart={0}
+										loadMore={this.loadNextPage}
+										hasMore={fileTable.hasNextPage}
+										loader={this.infiniteScrollLoadingComponent}
+									>
+										{this.filesHeaderComponent}
+										{fileTable.items.slice(1).map(file => this.renderFileRow(file))}
+									</InfiniteScroll>
+								)
+							}
+						</div>
 					</div>
 				</div>
 				<RouterView/>
