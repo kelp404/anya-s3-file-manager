@@ -1,4 +1,4 @@
-a, .btn-link {
+a:not(.nav-link), .btn-link {
   text-decoration: none;
 
   &:hover, &.active, &:focus {
