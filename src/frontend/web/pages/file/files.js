@@ -1,4 +1,5 @@
 const classnames = require('classnames');
+const nprogress = require('nprogress');
 const PropTypes = require('prop-types');
 const React = require('react');
 const {Link, RouterView, getRouter} = require('capybara-router');
@@ -169,6 +170,43 @@ module.exports = class FilesPage extends Base {
 			.map(([key]) => key);
 
 		window.open(`/api/files/${fileIds.join(',')}`, '_blank');
+	};
+
+	onDeleteFiles = async () => {
+		try {
+			const {checked} = this.state;
+			const fileIds = Object.entries(checked)
+				.filter(([_, value]) => value)
+				.map(([key]) => Number(key));
+
+			nprogress.start();
+			await api.file.deleteFiles({fileIds});
+			this.setState(prevState => {
+				const nextChecked = {...prevState.checked};
+				const nextFileTableItems = [
+					...prevState.fileTable.items.slice(0, 1),
+					...prevState.fileTable.items.slice(1).filter(file => !fileIds.includes(file.id)),
+				];
+
+				for (const fileId of fileIds) {
+					delete nextChecked[fileId];
+				}
+
+				return {
+					checked: {
+						...nextChecked,
+					},
+					fileTable: {
+						...prevState.fileTable,
+						items: nextFileTableItems,
+					},
+				};
+			});
+		} catch (error) {
+			utils.renderError(error);
+		} finally {
+			nprogress.done();
+		}
 	};
 
 	onLoadNextPage = async () => {
@@ -376,6 +414,7 @@ module.exports = class FilesPage extends Base {
 									type="button" className="btn btn-sm btn-outline-danger"
 									style={{lineHeight: 'initial'}}
 									disabled={$isApiProcessing || !hasAnyChecked}
+									onClick={this.onDeleteFiles}
 								>
 									{_('Delete')}
 								</button>
