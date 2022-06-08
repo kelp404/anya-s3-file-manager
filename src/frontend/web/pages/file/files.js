@@ -150,7 +150,7 @@ module.exports = class FilesPage extends Base {
 		}));
 	};
 
-	loadNextPage = async () => {
+	onLoadNextPage = async () => {
 		try {
 			const {fileTable} = this.state;
 			const response = await api.file.getFiles({
@@ -371,7 +371,7 @@ module.exports = class FilesPage extends Base {
 									<InfiniteScroll
 										className="files-wrapper"
 										pageStart={0}
-										loadMore={this.loadNextPage}
+										loadMore={this.onLoadNextPage}
 										hasMore={fileTable.hasNextPage}
 										loader={this.infiniteScrollLoadingComponent}
 									>
