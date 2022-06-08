@@ -125,6 +125,18 @@ module.exports = class FilesPage extends Base {
 		});
 	};
 
+	hasAnyChecked = () => {
+		const {checked} = this.state;
+
+		for (const key in checked) {
+			if (checked[key]) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
 	onChangeKeyword = event => {
 		this.setState({keyword: event.target.value});
 	};
@@ -148,6 +160,15 @@ module.exports = class FilesPage extends Base {
 				[fileId]: !prevState.checked[fileId],
 			},
 		}));
+	};
+
+	onDownloadFiles = () => {
+		const {checked} = this.state;
+		const fileIds = Object.entries(checked)
+			.filter(([_, value]) => value)
+			.map(([key]) => key);
+
+		window.open(`/api/files/${fileIds.join(',')}`, '_blank');
 	};
 
 	onLoadNextPage = async () => {
@@ -270,7 +291,8 @@ module.exports = class FilesPage extends Base {
 
 	render() {
 		const {params} = this.props;
-		const {breadcrumb, keyword, tagTable, fileTable} = this.state;
+		const {breadcrumb, keyword, tagTable, fileTable, $isApiProcessing} = this.state;
+		const hasAnyChecked = this.hasAnyChecked();
 
 		return (
 			<div className="container-fluid py-3">
@@ -350,10 +372,19 @@ module.exports = class FilesPage extends Base {
 
 						<div className="card">
 							<div className="card-header px-2">
-								<button type="button" className="btn btn-sm btn-outline-danger" style={{lineHeight: 'initial'}}>
+								<button
+									type="button" className="btn btn-sm btn-outline-danger"
+									style={{lineHeight: 'initial'}}
+									disabled={$isApiProcessing || !hasAnyChecked}
+								>
 									{_('Delete')}
 								</button>
-								<button type="button" className="btn btn-sm btn-outline-primary ms-2" style={{lineHeight: 'initial'}}>
+								<button
+									type="button" className="btn btn-sm btn-outline-primary ms-2"
+									style={{lineHeight: 'initial'}}
+									disabled={$isApiProcessing || !hasAnyChecked}
+									onClick={this.onDownloadFiles}
+								>
 									{_('Download')}
 								</button>
 							</div>
