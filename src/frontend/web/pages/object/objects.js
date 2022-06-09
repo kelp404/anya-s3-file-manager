@@ -22,6 +22,7 @@ module.exports = class ObjectsPage extends Base {
 	static propTypes = {
 		params: PropTypes.shape({
 			dirname: PropTypes.string,
+			keyword: PropTypes.string,
 		}).isRequired,
 		objects: PropTypes.shape({
 			items: PropTypes.arrayOf(PropTypes.shape({

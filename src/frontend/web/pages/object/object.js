@@ -14,6 +14,7 @@ const _ = require('../../../languages');
 
 module.exports = class ObjectPage extends Base {
 	static propTypes = {
+		params: PropTypes.object.isRequired,
 		object: PropTypes.shape({
 			id: PropTypes.number.isRequired,
 			path: PropTypes.string.isRequired,
