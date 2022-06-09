@@ -66,7 +66,7 @@ exports.uploadFile = async (req, res) => {
 				});
 
 				try {
-					object.save();
+					await object.save();
 				} catch (error) {
 					if (
 						error instanceof UniqueConstraintError
