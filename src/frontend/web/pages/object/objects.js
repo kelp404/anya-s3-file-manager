@@ -241,30 +241,30 @@ module.exports = class ObjectsPage extends Base {
 	};
 
 	infiniteScrollLoadingComponent = (
-		<div key="loading" className="border-top"><Loading/></div>
+		<li key="loading" className="list-group"><Loading/></li>
 	);
 
 	objectsHeaderComponent = (
-		<div key={0} className="d-flex align-items-end px-1">
-			<div className="py-2 px-1">
+		<li key={0} className="list-group-item d-flex align-items-end">
+			<div className="pe-1">
 				<div className="form-check">
 					<input className="form-check-input" type="checkbox" onChange={this.onChangeCheckAll}/>
 				</div>
 			</div>
-			<div className="flex-grow-1 py-2 px-1 text-truncate">
+			<div className="flex-grow-1 px-1 text-truncate">
 				<strong>{_('Name')}</strong>
 			</div>
-			<div className="py-2 px-1 text-truncate" style={{minWidth: '270px'}}>
+			<div className="px-1 text-truncate" style={{minWidth: '270px'}}>
 				<strong>{_('Last modified')}</strong>
 			</div>
-			<div className="py-2 px-1" style={{minWidth: '86px'}}>
+			<div className="ps-1" style={{minWidth: '86px'}}>
 				<strong>{_('Size')}</strong>
 			</div>
-		</div>
+		</li>
 	);
 
 	emptyObjectRowComponent = (
-		<div className="p-4 border-top text-muted text-center">{_('Empty')}</div>
+		<li className="list-group-item py-4 text-muted text-center">{_('Empty')}</li>
 	);
 
 	renderObjectRow = object => {
@@ -291,8 +291,8 @@ module.exports = class ObjectsPage extends Base {
 		}
 
 		return (
-			<div key={object.id} className="object-row d-flex align-items-end border-top px-1">
-				<div className="py-2 px-1">
+			<li key={object.id} className="object-row list-group-item d-flex align-items-end">
+				<div className="pe-1">
 					<div className="form-check">
 						<input
 							data-object-id={object.id}
@@ -303,27 +303,27 @@ module.exports = class ObjectsPage extends Base {
 						/>
 					</div>
 				</div>
-				<div className="py-2 px-1 text-muted">
+				<div className="px-1 text-muted">
 					{
 						object.type === OBJECT_TYPE.FILE
 							? <i className="fa-fw fa-regular fa-file-lines"/>
 							: <i className="fa-fw fa-regular fa-folder"/>
 					}
 				</div>
-				<div className="flex-grow-1 py-2 px-1 text-truncate">
+				<div className="flex-grow-1 px-1 text-truncate">
 					{
 						object.type === OBJECT_TYPE.FILE
 							? <Link to={generateFileLinkToParams(object)}>{name}</Link>
 							: <Link to={generateFolderLinkToParams(object)}>{name}</Link>
 					}
 				</div>
-				<pre className="py-2 px-1 m-0 text-truncate" style={{minWidth: '270px'}}>
+				<pre className="px-1 m-0 text-truncate" style={{minWidth: '270px'}}>
 					{object.type === OBJECT_TYPE.FILE ? utils.formatDate(object.lastModified) : '-'}
 				</pre>
-				<pre className="py-2 px-1 m-0 text-end" style={{minWidth: '86px'}}>
+				<pre className="ps-1 m-0 text-end" style={{minWidth: '86px'}}>
 					{object.type === OBJECT_TYPE.FILE ? utils.formatSize(object.size) : '-'}
 				</pre>
-			</div>
+			</li>
 		);
 	};
 
@@ -376,7 +376,7 @@ module.exports = class ObjectsPage extends Base {
 						</div>
 
 						<div className="card">
-							<div className="card-header px-2 d-flex justify-content-between">
+							<div className="card-header d-flex justify-content-between">
 								<div>
 									<button
 										type="button" className="btn btn-sm btn-outline-danger"
@@ -409,16 +409,17 @@ module.exports = class ObjectsPage extends Base {
 
 							{
 								objectTable.items.length === 1 && (
-									<div className="objects-wrapper">
+									<ul className="objects-wrapper list-group list-group-flush">
 										{this.objectsHeaderComponent}
 										{this.emptyObjectRowComponent}
-									</div>
+									</ul>
 								)
 							}
 							{
 								objectTable.items.length > 1 && (
 									<InfiniteScroll
-										className="objects-wrapper"
+										element="ul"
+										className="objects-wrapper list-group list-group-flush"
 										pageStart={0}
 										loadMore={this.onLoadNextPage}
 										hasMore={objectTable.hasNextPage}
