@@ -19,10 +19,4 @@ module.exports = {
 			params: {ids: fileIds},
 		}),
 	},
-	tag: {
-		getTags: () => sendRequest({
-			method: 'get',
-			url: `${BASE_PATH}/tags`,
-		}),
-	},
 };

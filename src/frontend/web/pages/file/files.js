@@ -1,4 +1,3 @@
-const classnames = require('classnames');
 const nprogress = require('nprogress');
 const PropTypes = require('prop-types');
 const React = require('react');
@@ -25,12 +24,6 @@ module.exports = class FilesPage extends Base {
 			dirname: PropTypes.string,
 			tagId: PropTypes.string,
 		}).isRequired,
-		tags: PropTypes.shape({
-			items: PropTypes.arrayOf(PropTypes.shape({
-				id: PropTypes.number.isRequired,
-				title: PropTypes.string.isRequired,
-			}).isRequired).isRequired,
-		}),
 		files: PropTypes.shape({
 			items: PropTypes.arrayOf(PropTypes.shape({
 				id: PropTypes.number.isRequired,
@@ -54,14 +47,12 @@ module.exports = class FilesPage extends Base {
 			keyword: props.params.keyword || '',
 			checked: Object.fromEntries(props.files.items.map(file => [file.id, false])),
 			fileTable: {...props.files, items: [null, ...props.files.items]},
-			tagTable: {...props.tags},
 			breadcrumb: {
 				items: [
 					{
 						id: Math.random().toString(36),
 						title: S3.BUCKET,
 						urlParams: {
-							tagId: props.params.tagId,
 							dirname: null,
 						},
 					},
@@ -69,7 +60,6 @@ module.exports = class FilesPage extends Base {
 						id: Math.random().toString(36),
 						title: folder,
 						urlParams: {
-							tagId: props.params.tagId,
 							dirname: folders.slice(0, index + 1).join('/'),
 						},
 					})),
@@ -335,46 +325,13 @@ module.exports = class FilesPage extends Base {
 	};
 
 	render() {
-		const {params} = this.props;
-		const {breadcrumb, keyword, tagTable, fileTable, $isApiProcessing} = this.state;
+		const {breadcrumb, keyword, fileTable, $isApiProcessing} = this.state;
 		const hasAnyChecked = this.hasAnyChecked();
 
 		return (
 			<div className="container-fluid py-3">
 				<div className="row">
-					<div className="d-none d-md-block col-md-4 col-lg-3 col-xl-2">
-						<div className="card">
-							<div className="card-header d-flex justify-content-between">
-								{_('Tags')}
-								<button type="button" className="btn btn-sm btn-outline-secondary" style={{lineHeight: 0}}>
-									{_('Modify')}
-								</button>
-							</div>
-							<div className="list-group list-group-flush">
-								{
-									tagTable.items.length === 0 && (
-										<div className="list-group-item text-muted text-center">{_('Empty')}</div>
-									)
-								}
-								{
-									tagTable.items.map(tag => (
-										<Link
-											key={tag.id}
-											className={classnames(
-												'list-group-item list-group-item-action text-truncate',
-												{active: tag.id === Number(params.tagId)},
-											)}
-											to={{name: this.myRoute.name, params: {...params, tagId: `${tag.id}`}}}
-										>
-											{tag.title}
-										</Link>
-									))
-								}
-							</div>
-						</div>
-					</div>
-
-					<div className="col-12 col-md-8 col-lg-9 col-xl-10">
+					<div className="col-12">
 						<div className="d-flex align-items-center justify-content-between mb-3">
 							{/* Breadcrumb */}
 							<nav>

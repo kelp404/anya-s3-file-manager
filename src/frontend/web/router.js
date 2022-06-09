@@ -15,9 +15,6 @@ module.exports = new Router({
 			name: 'web',
 			uri: '',
 			component: require('./pages/shared/layout'),
-			resolve: {
-				tags: () => api.tag.getTags().then(response => response.data),
-			},
 		},
 		{
 			name: 'web.home',

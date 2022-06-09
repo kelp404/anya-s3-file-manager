@@ -73,8 +73,3 @@ Model.prototype.toJSON = function () {
 };
 
 module.exports = Model;
-
-const TagModel = require('./tag-model');
-const FileTagModel = require('./file-tag-model');
-
-Model.belongsToMany(TagModel, {through: FileTagModel});
