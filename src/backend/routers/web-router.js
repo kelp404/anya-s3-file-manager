@@ -1,6 +1,7 @@
 const {setNoCacheHeader} = require('../common/utils');
 const ExpressRouter = require('../models/express-router');
 const baseHandler = require('../handlers/base-handler');
+const fileHandler = require('../handlers/file-handler');
 const objectHandler = require('../handlers/object-handler');
 
 const expressRouter = new ExpressRouter();
@@ -12,6 +13,6 @@ expressRouter.get(/^\/objects\/\d+$/, setNoCacheHeader, baseHandler.getBaseView)
 expressRouter.get('/api/objects', setNoCacheHeader, objectHandler.getObjects);
 expressRouter.get('/api/objects/:objectId(\\d+)', setNoCacheHeader, objectHandler.getObject);
 expressRouter.delete('/api/objects', objectHandler.deleteObjects);
-expressRouter.get('/api/files', objectHandler.downloadFiles);
+expressRouter.get('/api/files', fileHandler.downloadFiles);
 
 module.exports = expressRouter.router;

@@ -14,5 +14,4 @@ exports.getObjectsFormSchema = {
 	},
 };
 
-exports.downloadFilesFormSchema = generateIdsSchema();
 exports.deleteObjectsFormSchema = generateIdsSchema();
