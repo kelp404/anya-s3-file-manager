@@ -5,6 +5,24 @@ const Base = require('../../../core/pages/base');
 const _ = require('../../../languages');
 
 module.exports = class UploaderPage extends Base {
+	constructor(props) {
+		super(props);
+		this.myRoute = getRouter().findRouteByName('web.files.uploader');
+		this.state.isShowModal = true;
+	}
+
+	componentDidMount() {
+		super.componentDidMount();
+		this.$listens.push(
+			getRouter().listen('ChangeStart', (action, toState, fromState, next) => {
+				const isShowModal = toState.name === this.myRoute.name;
+
+				this.setState({isShowModal});
+				next();
+			}),
+		);
+	}
+
 	onHideModal = () => {
 		getRouter().go({
 			name: 'web.files',
@@ -13,7 +31,7 @@ module.exports = class UploaderPage extends Base {
 	};
 
 	render() {
-		const isShowModal = true;
+		const {isShowModal} = this.state;
 
 		return (
 			<Modal
