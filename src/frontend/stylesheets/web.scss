@@ -1,9 +1,9 @@
 @import "~nprogress/nprogress.css";
 @import "~@fortawesome/fontawesome-free/css/all.css";
 
-@import "./bootstrap";
-@import "./overwrite-bootstrap";
+@import "bootstrap";
+@import "overwrite-bootstrap";
 
-@import "./files";
-@import "./loading";
-@import "./main";
+@import "objects";
+@import "loading";
+@import "main";

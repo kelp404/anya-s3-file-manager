@@ -8,7 +8,7 @@ module.exports = class Home extends React.Component {
 	}
 
 	componentDidMount() {
-		getRouter().go({name: 'web.files'});
+		getRouter().go({name: 'web.objects'});
 	}
 
 	render() {

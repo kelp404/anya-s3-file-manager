@@ -4,30 +4,29 @@ const React = require('react');
 const {Link, RouterView, getRouter} = require('capybara-router');
 const InfiniteScroll = require('@kelp404/react-infinite-scroller');
 const {
-	FILE_TYPE,
+	OBJECT_TYPE,
 } = require('../../../../shared/constants');
 const api = require('../../../core/apis/web');
 const Loading = require('../../../core/components/loading');
 const Base = require('../../../core/pages/base');
 const utils = require('../../../core/utils');
 const {
-	STORE_KEYS: {DELETED_FILE_NOTIFICATION},
+	STORE_KEYS: {DELETED_OBJECT_NOTIFICATION},
 } = require('../../../core/constants');
 const store = require('../../../core/store');
 const _ = require('../../../languages');
 
 const {S3} = window.config;
 
-module.exports = class FilesPage extends Base {
+module.exports = class ObjectsPage extends Base {
 	static propTypes = {
 		params: PropTypes.shape({
 			dirname: PropTypes.string,
-			tagId: PropTypes.string,
 		}).isRequired,
-		files: PropTypes.shape({
+		objects: PropTypes.shape({
 			items: PropTypes.arrayOf(PropTypes.shape({
 				id: PropTypes.number.isRequired,
-				type: PropTypes.oneOf(Object.values(FILE_TYPE)).isRequired,
+				type: PropTypes.oneOf(Object.values(OBJECT_TYPE)).isRequired,
 				path: PropTypes.string.isRequired,
 				dirname: PropTypes.string.isRequired,
 				basename: PropTypes.string.isRequired,
@@ -42,11 +41,11 @@ module.exports = class FilesPage extends Base {
 
 		const folders = props.params.dirname?.split('/') || [];
 
-		this.myRoute = getRouter().findRouteByName('web.files');
+		this.myRoute = getRouter().findRouteByName('web.objects');
 		this.state = {
 			keyword: props.params.keyword || '',
-			checked: Object.fromEntries(props.files.items.map(file => [file.id, false])),
-			fileTable: {...props.files, items: [null, ...props.files.items]},
+			checked: Object.fromEntries(props.objects.items.map(({id}) => [id, false])),
+			objectTable: {...props.objects, items: [null, ...props.objects.items]},
 			breadcrumb: {
 				items: [
 					{
@@ -71,10 +70,10 @@ module.exports = class FilesPage extends Base {
 	componentDidMount() {
 		super.componentDidMount();
 		this.$listens.push(
-			store.subscribe(DELETED_FILE_NOTIFICATION, (event, {fileId}) => {
+			store.subscribe(DELETED_OBJECT_NOTIFICATION, (event, {objectId}) => {
 				this.setState(prevState => {
-					const items = [...prevState.fileTable.items];
-					const index = items.findIndex(file => file?.id === fileId);
+					const items = [...prevState.objectTable.items];
+					const index = items.findIndex(item => item?.id === objectId);
 
 					if (index < 0) {
 						return;
@@ -82,12 +81,12 @@ module.exports = class FilesPage extends Base {
 
 					const nextChecked = {...prevState.checked};
 
-					delete nextChecked[fileId];
+					delete nextChecked[objectId];
 					items.splice(index, 1);
 					return {
 						checked: nextChecked,
-						fileTable: {
-							...prevState.fileTable,
+						objectTable: {
+							...prevState.objectTable,
 							items,
 						},
 					};
@@ -133,62 +132,65 @@ module.exports = class FilesPage extends Base {
 	};
 
 	onChangeCheckAll = event => {
-		const {fileTable} = this.state;
+		const {objectTable} = this.state;
 
 		this.setState({
 			checked: Object.fromEntries(
-				fileTable.items.slice(1).map(file => [file.id, Boolean(event.target.checked)]),
+				objectTable.items.slice(1).map(object => [object.id, Boolean(event.target.checked)]),
 			),
 		});
 	};
 
-	onChangeCheckFile = event => {
-		const {fileId} = event.target.dataset;
+	onChangeCheckObject = event => {
+		const {objectId} = event.target.dataset;
 
 		this.setState(prevState => ({
 			checked: {
 				...prevState.checked,
-				[fileId]: !prevState.checked[fileId],
+				[objectId]: !prevState.checked[objectId],
 			},
 		}));
 	};
 
 	onDownloadFiles = () => {
 		const {checked} = this.state;
-		const fileIds = Object.entries(checked)
+		const objectIds = Object.entries(checked)
 			.filter(([_, value]) => value)
 			.map(([key]) => key);
+		const queryString = new URLSearchParams({
+			ids: objectIds,
+		});
 
-		window.open(`/api/files/${fileIds.join(',')}`, '_blank');
+		window.open(`/api/files?${queryString}`, '_blank');
 	};
 
-	onDeleteFiles = async () => {
+	onDeleteObjects = async () => {
 		try {
 			const {checked} = this.state;
-			const fileIds = Object.entries(checked)
+			const objectIds = Object.entries(checked)
 				.filter(([_, value]) => value)
 				.map(([key]) => Number(key));
 
 			nprogress.start();
-			await api.file.deleteFiles({fileIds});
+			await api.object.deleteObjects({objectIds});
 			this.setState(prevState => {
 				const nextChecked = {...prevState.checked};
-				const nextFileTableItems = [
-					...prevState.fileTable.items.slice(0, 1),
-					...prevState.fileTable.items.slice(1).filter(file => !fileIds.includes(file.id)),
+				const nextObjectTableItems = [
+					...prevState.objectTable.items.slice(0, 1),
+					...prevState.objectTable.items.slice(1).filter(object => !objectIds.includes(object.id)),
 				];
 
-				for (const fileId of fileIds) {
-					delete nextChecked[fileId];
+				for (const objectId of objectIds) {
+					delete nextChecked[objectId];
 				}
 
 				return {
 					checked: {
 						...nextChecked,
 					},
-					fileTable: {
-						...prevState.fileTable,
-						items: nextFileTableItems,
+					objectTable: {
+						...prevState.objectTable,
+						items: nextObjectTableItems,
 					},
 				};
 			});
@@ -201,17 +203,17 @@ module.exports = class FilesPage extends Base {
 
 	onShowUploader = () => {
 		getRouter().go({
-			name: 'web.files.uploader',
+			name: 'web.objects.uploader',
 			params: this.props.params,
 		});
 	};
 
 	onLoadNextPage = async () => {
 		try {
-			const {fileTable} = this.state;
-			const response = await api.file.getFiles({
+			const {objectTable} = this.state;
+			const response = await api.object.getObjects({
 				...this.props.params,
-				after: fileTable.items[fileTable.items.length - 1].id,
+				after: objectTable.items[objectTable.items.length - 1].id,
 			});
 
 			return new Promise(resolve => {
@@ -219,12 +221,12 @@ module.exports = class FilesPage extends Base {
 					prevState => ({
 						checked: {
 							...prevState.checked,
-							...Object.fromEntries(response.data.items.map(file => [file.id, false])),
+							...Object.fromEntries(response.data.items.map(object => [object.id, false])),
 						},
-						fileTable: {
+						objectTable: {
 							...response.data,
 							items: [
-								...prevState.fileTable.items,
+								...prevState.objectTable.items,
 								...response.data.items,
 							],
 						},
@@ -241,7 +243,7 @@ module.exports = class FilesPage extends Base {
 		<div key="loading" className="border-top"><Loading/></div>
 	);
 
-	filesHeaderComponent = (
+	objectsHeaderComponent = (
 		<div key={0} className="d-flex align-items-end px-1">
 			<div className="py-2 px-1">
 				<div className="form-check">
@@ -260,72 +262,72 @@ module.exports = class FilesPage extends Base {
 		</div>
 	);
 
-	emptyFileRowComponent = (
+	emptyObjectRowComponent = (
 		<div className="p-4 border-top text-muted text-center">{_('Empty')}</div>
 	);
 
-	renderFileRow = file => {
+	renderObjectRow = object => {
 		const {params} = this.props;
 		const {checked} = this.state;
-		const generateFolderLinkToParams = file => ({
+		const generateFolderLinkToParams = object => ({
 			name: this.myRoute.name,
 			params: {
-				dirname: file.dirname ? `${file.dirname}/${file.basename}` : file.basename,
+				dirname: object.dirname ? `${object.dirname}/${object.basename}` : object.basename,
 				keyword: null,
 			},
 		});
-		const generateFileLinkToParams = file => ({
-			name: 'web.files.details',
-			params: {...params, fileId: file.id},
+		const generateFileLinkToParams = object => ({
+			name: 'web.objects.details',
+			params: {...params, objectId: object.id},
 		});
 		let name = params.dirname
-			? file.path.replace(`${params.dirname}/`, '')
-			: file.path;
+			? object.path.replace(`${params.dirname}/`, '')
+			: object.path;
 
-		if (file.type === FILE_TYPE.FOLDER) {
+		if (object.type === OBJECT_TYPE.FOLDER) {
 			// Remove "/" at suffix.
 			name = name.slice(0, -1);
 		}
 
 		return (
-			<div key={file.id} className="file-row d-flex align-items-end border-top px-1">
+			<div key={object.id} className="object-row d-flex align-items-end border-top px-1">
 				<div className="py-2 px-1">
 					<div className="form-check">
 						<input
-							data-file-id={file.id}
+							data-object-id={object.id}
 							className="form-check-input"
 							type="checkbox"
-							checked={checked[file.id]}
-							onChange={this.onChangeCheckFile}
+							checked={checked[object.id]}
+							onChange={this.onChangeCheckObject}
 						/>
 					</div>
 				</div>
 				<div className="py-2 px-1 text-muted">
 					{
-						file.type === FILE_TYPE.FILE
+						object.type === OBJECT_TYPE.FILE
 							? <i className="fa-fw fa-regular fa-file-lines"/>
 							: <i className="fa-fw fa-regular fa-folder"/>
 					}
 				</div>
 				<div className="flex-grow-1 py-2 px-1 text-truncate">
 					{
-						file.type === FILE_TYPE.FILE
-							? <Link to={generateFileLinkToParams(file)}>{name}</Link>
-							: <Link to={generateFolderLinkToParams(file)}>{name}</Link>
+						object.type === OBJECT_TYPE.FILE
+							? <Link to={generateFileLinkToParams(object)}>{name}</Link>
+							: <Link to={generateFolderLinkToParams(object)}>{name}</Link>
 					}
 				</div>
 				<pre className="py-2 px-1 m-0 text-truncate" style={{minWidth: '270px'}}>
-					{file.type === FILE_TYPE.FILE ? utils.formatDate(file.lastModified) : '-'}
+					{object.type === OBJECT_TYPE.FILE ? utils.formatDate(object.lastModified) : '-'}
 				</pre>
 				<pre className="py-2 px-1 m-0 text-end" style={{minWidth: '86px'}}>
-					{file.type === FILE_TYPE.FILE ? utils.formatSize(file.size) : '-'}
+					{object.type === OBJECT_TYPE.FILE ? utils.formatSize(object.size) : '-'}
 				</pre>
 			</div>
 		);
 	};
 
 	render() {
-		const {breadcrumb, keyword, fileTable, $isApiProcessing} = this.state;
+		const {breadcrumb, keyword, objectTable, $isApiProcessing} = this.state;
 		const hasAnyChecked = this.hasAnyChecked();
 
 		return (
@@ -379,7 +381,7 @@ module.exports = class FilesPage extends Base {
 										type="button" className="btn btn-sm btn-outline-danger"
 										style={{lineHeight: 'initial'}}
 										disabled={$isApiProcessing || !hasAnyChecked}
-										onClick={this.onDeleteFiles}
+										onClick={this.onDeleteObjects}
 									>
 										{_('Delete')}
 									</button>
@@ -405,24 +407,24 @@ module.exports = class FilesPage extends Base {
 							</div>
 
 							{
-								fileTable.items.length === 1 && (
-									<div className="files-wrapper">
-										{this.filesHeaderComponent}
-										{this.emptyFileRowComponent}
+								objectTable.items.length === 1 && (
+									<div className="objects-wrapper">
+										{this.objectsHeaderComponent}
+										{this.emptyObjectRowComponent}
 									</div>
 								)
 							}
 							{
-								fileTable.items.length > 1 && (
+								objectTable.items.length > 1 && (
 									<InfiniteScroll
-										className="files-wrapper"
+										className="objects-wrapper"
 										pageStart={0}
 										loadMore={this.onLoadNextPage}
-										hasMore={fileTable.hasNextPage}
+										hasMore={objectTable.hasNextPage}
 										loader={this.infiniteScrollLoadingComponent}
 									>
-										{this.filesHeaderComponent}
-										{fileTable.items.slice(1).map(file => this.renderFileRow(file))}
+										{this.objectsHeaderComponent}
+										{objectTable.items.slice(1).map(object => this.renderObjectRow(object))}
 									</InfiniteScroll>
 								)
 							}

@@ -3,20 +3,25 @@ const {sendRequest} = require('.');
 const BASE_PATH = '/api';
 
 module.exports = {
-	file: {
-		getFiles: ({dirname, keyword, after, limit} = {}) => sendRequest({
+	object: {
+		getObjects: ({dirname, keyword, after, limit} = {}) => sendRequest({
 			method: 'get',
-			url: `${BASE_PATH}/files`,
+			url: `${BASE_PATH}/objects`,
 			params: {dirname, keyword, after, limit},
 		}),
-		getFileInformation: ({fileId}) => sendRequest({
+		getObject: ({objectId}) => sendRequest({
 			method: 'get',
-			url: `${BASE_PATH}/files/${fileId}/information`,
+			url: `${BASE_PATH}/objects/${objectId}`,
 		}),
-		deleteFiles: ({fileIds}) => sendRequest({
-			method: 'delete',
-			url: `${BASE_PATH}/files`,
-			params: {ids: fileIds},
-		}),
+		deleteObjects({objectIds}) {
+			const queryString = new URLSearchParams({
+				ids: objectIds,
+			});
+
+			return sendRequest({
+				method: 'delete',
+				url: `${BASE_PATH}/objects?${queryString}`,
+			});
+		},
 	},
 };

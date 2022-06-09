@@ -45,7 +45,7 @@ async function initialDatabase() {
 	const {connectDatabase} = require('./common/database');
 	const {
 		downloadDatabaseFromS3,
-		syncFilesFromS3,
+		syncObjectsFromS3,
 	} = require('./common/s3');
 
 	let db;
@@ -87,8 +87,8 @@ async function initialDatabase() {
 
 	console.log(migrationResult.toString());
 	connectDatabase();
-	console.log('Sync files from S3.');
-	await syncFilesFromS3();
+	console.log('Sync objects from S3.');
+	await syncObjectsFromS3();
 }
 
 function launchServer() {

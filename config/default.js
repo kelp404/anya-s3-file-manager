@@ -36,6 +36,5 @@ module.exports = {
 	},
 	LIMIT: {
 		FILE_SIZE: 900 * 1024 * 1024, // 900MB
-		TAG_QUANTITY: 1000,
 	},
 };

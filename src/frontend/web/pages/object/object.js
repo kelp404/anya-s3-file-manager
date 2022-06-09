@@ -7,14 +7,14 @@ const Base = require('../../../core/pages/base');
 const api = require('../../../core/apis/web');
 const utils = require('../../../core/utils');
 const {
-	STORE_KEYS: {DELETED_FILE_NOTIFICATION},
+	STORE_KEYS: {DELETED_OBJECT_NOTIFICATION},
 } = require('../../../core/constants');
 const store = require('../../../core/store');
 const _ = require('../../../languages');
 
-module.exports = class FilePage extends Base {
+module.exports = class ObjectPage extends Base {
 	static propTypes = {
-		file: PropTypes.shape({
+		object: PropTypes.shape({
 			id: PropTypes.number.isRequired,
 			path: PropTypes.string.isRequired,
 			basename: PropTypes.string.isRequired,
@@ -25,7 +25,7 @@ module.exports = class FilePage extends Base {
 
 	constructor(props) {
 		super(props);
-		this.myRoute = getRouter().findRouteByName('web.files.details');
+		this.myRoute = getRouter().findRouteByName('web.objects.details');
 		this.state.isShowModal = true;
 	}
 
@@ -41,15 +41,15 @@ module.exports = class FilePage extends Base {
 		);
 	}
 
-	onDeleteFile = async () => {
+	onDeleteObject = async () => {
 		try {
-			const {id: fileId} = this.props.file;
+			const {id} = this.props.object;
 
 			nprogress.start();
-			await api.file.deleteFiles({fileIds: [fileId]});
-			store.broadcast(DELETED_FILE_NOTIFICATION, {fileId});
+			await api.object.deleteObjects({objectIds: [id]});
+			store.broadcast(DELETED_OBJECT_NOTIFICATION, {objectId: id});
 			getRouter().go({
-				name: 'web.files',
+				name: 'web.objects',
 				params: this.props.params,
 			});
 		} catch (error) {
@@ -59,30 +59,34 @@ module.exports = class FilePage extends Base {
 	};
 
 	onDownloadFile = () => {
-		window.open(`/api/files/${this.props.file.id}`, '_blank');
+		window.open(`/api/files?ids=${this.props.object.id}`, '_blank');
 	};
 
 	onHideModal = () => {
 		getRouter().go({
-			name: 'web.files',
+			name: 'web.objects',
 			params: this.props.params,
 		});
 	};
 
-	renderPreview = file => {
-		const contentType = file.objectHeaders.ContentType;
+	renderPreview = object => {
+		const contentType = object.objectHeaders.ContentType;
 
 		if (/^image\//.test(contentType)) {
 			return (
 				<div className="col-12">
-					<img src={`/api/files/${file.id}`} className="rounded mx-auto d-block" style={{maxHeight: '300px'}}/>
+					<img
+						className="rounded mx-auto d-block"
+						src={`/api/files?ids=${object.id}`}
+						style={{maxHeight: '300px'}}
+					/>
 				</div>
 			);
 		}
 	};
 
 	render() {
-		const {file} = this.props;
+		const {object} = this.props;
 		const {$isApiProcessing, isShowModal} = this.state;
 
 		return (
@@ -93,28 +97,28 @@ module.exports = class FilePage extends Base {
 				onHide={this.onHideModal}
 			>
 				<Modal.Header closeButton>
-					<Modal.Title>{file.basename}</Modal.Title>
+					<Modal.Title>{object.basename}</Modal.Title>
 				</Modal.Header>
 
 				<Modal.Body>
 					<div className="row">
-						{this.renderPreview(file)}
+						{this.renderPreview(object)}
 						<div className="col-12 mb-2">
 							<strong className="d-block text-secondary mb-0">{_('Path')}</strong>
-							<span>{file.path}</span>
+							<span>{object.path}</span>
 						</div>
 						<div className="col-12 col-md-6 mb-2">
 							<strong className="d-block text-secondary mb-0">{_('Last modified')}</strong>
-							<span>{utils.formatDate(file.lastModified)}</span>
+							<span>{utils.formatDate(object.lastModified)}</span>
 						</div>
 						<div className="col-12 col-md-6 mb-2">
 							<strong className="d-block text-secondary mb-0">{_('Size')}</strong>
-							<span>{utils.formatSize(file.size)}</span>
+							<span>{utils.formatSize(object.size)}</span>
 						</div>
 						<div className="col-12">
 							<strong className="d-block text-secondary mb-0">{_('Object headers')}</strong>
 							<pre>
-								<code>{JSON.stringify(file.objectHeaders, null, 4)}</code>
+								<code>{JSON.stringify(object.objectHeaders, null, 4)}</code>
 							</pre>
 						</div>
 					</div>
@@ -130,7 +134,7 @@ module.exports = class FilePage extends Base {
 					<button
 						disabled={$isApiProcessing}
 						type="button" className="btn btn-outline-danger"
-						onClick={this.onDeleteFile}
+						onClick={this.onDeleteObject}
 					>
 						{_('Delete')}
 					</button>

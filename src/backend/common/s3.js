@@ -3,8 +3,8 @@ const AWS = require('aws-sdk');
 const {S3Client, GetObjectCommand} = require('@aws-sdk/client-s3');
 const config = require('config');
 const {Op} = require('sequelize');
-const FileModel = require('../models/data/file-model');
-const {FILE_TYPE} = require('../../shared/constants');
+const ObjectModel = require('../models/data/object-model');
+const {OBJECT_TYPE} = require('../../shared/constants');
 
 const {
 	S3,
@@ -53,18 +53,18 @@ exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
 	}
 };
 
-exports.syncFilesFromS3 = async () => {
+exports.syncObjectsFromS3 = async () => {
 	const start = new Date();
 	const scanObjects = async continuationToken => {
 		const pathSet = new Set();
 		const result = await s3
 			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken})
 			.promise();
-		const convertS3ObjectToFile = ({Key, Size, LastModified}) => {
+		const convertS3Object = ({Key, Size, LastModified}) => {
 			const dirname = path.dirname(Key);
 
 			return {
-				type: Key.slice(-1) === '/' ? FILE_TYPE.FOLDER : FILE_TYPE.FILE,
+				type: Key.slice(-1) === '/' ? OBJECT_TYPE.FOLDER : OBJECT_TYPE.FILE,
 				path: Key,
 				dirname: dirname === '.' ? '' : dirname,
 				basename: path.basename(Key),
@@ -74,31 +74,30 @@ exports.syncFilesFromS3 = async () => {
 		};
 
 		await Promise.all([
-			FileModel.bulkCreate(
+			ObjectModel.bulkCreate(
 				result.Contents
 					.map(content => {
 						const pieces = content.Key.split('/').slice(0, -1);
-						const file = convertS3ObjectToFile(content);
 
 						return [
-							file,
-							...pieces.map((piece, index) => convertS3ObjectToFile({
+							convertS3Object(content),
+							...pieces.map((piece, index) => convertS3Object({
 								Key: `${pieces.slice(0, index + 1).join('/')}/`,
 							})),
 						];
 					})
 					.flat()
-					.filter(file => {
-						if (file.type === FILE_TYPE.FILE) {
-							pathSet.add(file.path);
+					.filter(object => {
+						if (object.type === OBJECT_TYPE.FILE) {
+							pathSet.add(object.path);
 							return true;
 						}
 
-						if (pathSet.has(file.path)) {
+						if (pathSet.has(object.path)) {
 							return false;
 						}
 
-						pathSet.add(file.path);
+						pathSet.add(object.path);
 						return true;
 					}),
 				{updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt']},
@@ -109,8 +108,8 @@ exports.syncFilesFromS3 = async () => {
 
 	await scanObjects();
 
-	// Remove missing files.
-	await FileModel.destroy({
+	// Remove missing objects.
+	await ObjectModel.destroy({
 		where: {updatedAt: {[Op.lt]: start}},
 	});
 };

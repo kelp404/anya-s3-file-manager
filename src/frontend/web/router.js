@@ -25,36 +25,36 @@ module.exports = new Router({
 			component: require('./pages/home'),
 		},
 		{
-			name: 'web.files',
-			uri: '/files?dirname?keyword?tagId',
+			name: 'web.objects',
+			uri: '/objects?dirname?keyword',
 			onEnter() {
-				document.title = `${_('Files')} - ${webTitle}`;
+				document.title = `${_('Objects')} - ${webTitle}`;
 			},
 			resolve: {
-				files: ({dirname, keyword}) => api.file.getFiles({dirname, keyword}).then(response => response.data),
+				objects: ({dirname, keyword}) => api.object.getObjects({dirname, keyword}).then(response => response.data),
 			},
 			loadComponent: () => import(
-				/* webpackChunkName: "web-files" */
-				'./pages/file/files'
+				/* webpackChunkName: "web-objects" */
+				'./pages/object/objects'
 			),
 		},
 		{
-			name: 'web.files.details',
-			uri: '/{fileId:\\d+}',
+			name: 'web.objects.details',
+			uri: '/{objectId:\\d+}',
 			dismissalDelay: 300,
-			onEnter({file}) {
-				document.title = `${file.basename} - ${_('Files')} - ${webTitle}`;
+			onEnter({object}) {
+				document.title = `${object.basename} - ${_('Objects')} - ${webTitle}`;
 			},
 			resolve: {
-				file: ({fileId}) => api.file.getFileInformation({fileId}).then(response => response.data),
+				object: ({objectId}) => api.object.getObject({objectId}).then(response => response.data),
 			},
 			loadComponent: () => import(
-				/* webpackChunkName: "web-file" */
-				'./pages/file/file'
+				/* webpackChunkName: "web-object" */
+				'./pages/object/object'
 			),
 		},
 		{
-			name: 'web.files.uploader',
+			name: 'web.objects.uploader',
 			uri: '/uploader',
 			dismissalDelay: 300,
 			onEnter() {
@@ -62,7 +62,7 @@ module.exports = new Router({
 			},
 			loadComponent: () => import(
 				/* webpackChunkName: "web-uploader" */
-				'./pages/file/uploader'
+				'./pages/object/uploader'
 			),
 		},
 		{

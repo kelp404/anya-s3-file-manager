@@ -38,11 +38,11 @@ module.exports = class Navigation extends Base {
 								<Link
 									className={classnames(
 										'nav-link',
-										{active: ['web.files', 'web.files.details'].includes(currentRouteName)},
+										{active: ['web.objects', 'web.objects.details'].includes(currentRouteName)},
 									)}
-									to="/files"
+									to="/objects"
 								>
-									{_('Files')}
+									{_('Objects')}
 								</Link>
 							</li>
 							<li className="nav-item">

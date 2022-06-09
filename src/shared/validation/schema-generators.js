@@ -3,6 +3,7 @@ const config = require('config');
 const {
 	PAGINATION,
 } = config;
+const MAX_ID_VALUE = 0x7FFFFFFF;
 
 function generateIdSchema({fieldName = 'id'} = {}) {
 	// Ref: https://dev.mysql.com/doc/refman/8.0/en/integer-types.html
@@ -12,8 +13,48 @@ function generateIdSchema({fieldName = 'id'} = {}) {
 			optional: false,
 			convert: true,
 			min: 1,
-			max: 0x7FFFFFFF,
+			max: MAX_ID_VALUE,
 			integer: true,
+		},
+	};
+}
+
+function generateIdsSchema({fieldName = 'ids'} = {}) {
+	return {
+		[fieldName]: {
+			type: 'string',
+			pattern: /^\d+(,\d+)*$/,
+			optional: false,
+			empty: false,
+			custom(value, errors, schema) {
+				if (schema.optional && value == null) {
+					return value;
+				}
+
+				const items = value.split(',').map(Number);
+				const set = new Set(items);
+
+				if (items.length !== set.size) {
+					errors.push({
+						type: 'arrayUnique',
+						actual: value,
+						expected: Array.from(set),
+					});
+				}
+
+				for (const item of items) {
+					if (item > MAX_ID_VALUE) {
+						errors.push({
+							type: 'numberMax',
+							actual: item,
+							expected: MAX_ID_VALUE,
+						});
+						break;
+					}
+				}
+
+				return items;
+			},
 		},
 	};
 }
@@ -48,6 +89,7 @@ function generateCursorPaginationSchema() {
 
 module.exports = {
 	generateIdSchema,
+	generateIdsSchema,
 	generateKeywordSchema,
 	generateCursorPaginationSchema,
 };

@@ -1,6 +1,6 @@
 const lodash = require('lodash');
 const {DataTypes} = require('sequelize');
-const {FILE_TYPE} = require('../../../shared/constants');
+const {OBJECT_TYPE} = require('../../../shared/constants');
 const {connectDatabase} = require('../../common/database');
 
 const {sequelize} = connectDatabase();
@@ -9,7 +9,7 @@ const attributes = {
 		type: DataTypes.TINYINT,
 		allowNull: false,
 		validate: {
-			isIn: [Object.values(FILE_TYPE)],
+			isIn: [Object.values(OBJECT_TYPE)],
 		},
 	},
 	path: {
@@ -18,10 +18,9 @@ const attributes = {
 	},
 	/**
 	 * The folder name.
-	 * AWS S3 Key: dirname
-	 * "test.txt": ""
-	 * "a/b/": "a"
-	 * "a/b/test.txt": "a/b"
+	 * 	"test.txt": ""
+	 * 	"a/b/": "a"
+	 * 	"a/b/test.txt": "a/b"
 	 */
 	dirname: {
 		type: new DataTypes.STRING(1024),
@@ -29,10 +28,9 @@ const attributes = {
 	},
 	/**
 	 * The file, folder name.
-	 * AWS S3 Key: dirname
-	 * "test.txt": "test.txt"
-	 * "a/b/": "b"
-	 * "a/b/test.txt": "test.txt"
+	 * 	"test.txt": "test.txt"
+	 * 	"a/b/": "b"
+	 * 	"a/b/test.txt": "test.txt"
 	 */
 	basename: {
 		type: DataTypes.CITEXT,
@@ -64,7 +62,7 @@ const options = {
 		},
 	],
 };
-const Model = sequelize.define('file', attributes, options);
+const Model = sequelize.define('object', attributes, options);
 
 Model.prototype.toJSON = function () {
 	const result = lodash.cloneDeep(this.get({plain: false}));

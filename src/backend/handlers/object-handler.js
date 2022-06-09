@@ -5,15 +5,16 @@ const contentDisposition = require('content-disposition');
 const pLimit = require('p-limit');
 const {Op} = require('sequelize');
 const {
-	FILE_TYPE,
+	OBJECT_TYPE,
 } = require('../../shared/constants');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
 const {
-	validateGetFilesQuery,
-	validateDeleteFilesQuery,
-} = require('../validators/file-validator');
-const FileModel = require('../models/data/file-model');
+	validateGetObjectsQuery,
+	validateDownloadFilesQuery,
+	validateDeleteObjectsQuery,
+} = require('../validators/object-validator');
+const ObjectModel = require('../models/data/object-model');
 const {
 	Http404,
 	Http422,
@@ -24,10 +25,10 @@ const {
 } = config;
 
 /*
-	GET /api/files
+	GET /api/objects
  */
-exports.getFiles = async (req, res) => {
-	const checkResult = validateGetFilesQuery(req.query);
+exports.getObjects = async (req, res) => {
+	const checkResult = validateGetObjectsQuery(req.query);
 
 	if (checkResult !== true) {
 		throw new Http422('form validation failed', checkResult);
@@ -55,13 +56,13 @@ exports.getFiles = async (req, res) => {
 	}
 
 	if (after) {
-		const cursor = await FileModel.findOne({
+		const cursor = await ObjectModel.findOne({
 			where: {id: after},
 			attributes: ['id', 'type', 'basename'],
 		});
 
 		if (cursor == null) {
-			throw new Http404(`not found file ${after}`);
+			throw new Http404(`not found object ${after}`);
 		}
 
 		afterConditions.push(
@@ -81,7 +82,7 @@ exports.getFiles = async (req, res) => {
 		);
 	}
 
-	const files = await FileModel.findAll({
+	const objects = await ObjectModel.findAll({
 		where: {
 			dirname: keywordConditions.length
 				? {[Op.like]: utils.generateLikeSyntax(dirname, {start: ''})}
@@ -98,56 +99,87 @@ exports.getFiles = async (req, res) => {
 	});
 
 	res.json({
-		hasNextPage: files.length > limit,
-		items: files.slice(0, limit),
+		hasNextPage: objects.length > limit,
+		items: objects.slice(0, limit),
 	});
 };
 
 /*
-	GET /api/files/:fileId/information
+	GET /api/objects/:objectId
  */
-exports.getFileInformation = async (req, res) => {
-	const {fileId} = req.params;
-	const file = await FileModel.findOne({
+exports.getObject = async (req, res) => {
+	const {objectId} = req.params;
+	const object = await ObjectModel.findOne({
 		where: {
-			id: fileId,
+			id: objectId,
 		},
 	});
 
-	if (!file) {
+	if (!object) {
 		throw new Http404();
 	}
 
-	const objectHeaders = await s3.headObject(file.path);
+	const objectHeaders = await s3.headObject(object.path);
 
 	res.json({
-		...file.toJSON(),
+		...object.toJSON(),
 		objectHeaders,
 	});
 };
 
 /*
-	GET /api/files/:fileId
+	GET /api/files
  */
-exports.downloadFile = async (req, res) => {
-	const NOT_FORWARD_HEADERS = [
-		'Accept-Ranges',
-	];
-	const {fileId} = req.params;
-	const file = await FileModel.findOne({
+exports.downloadFiles = async (req, res) => {
+	const checkResult = validateDownloadFilesQuery(req.query);
+
+	if (checkResult !== true) {
+		throw new Http422('form validation failed', checkResult);
+	}
+
+	const {ids} = req.query;
+	const limit = pLimit(1);
+	const files = [];
+	const objects = await ObjectModel.findAll({
 		where: {
-			id: fileId,
+			id: {[Op.in]: ids},
 		},
 	});
 
-	if (!file) {
-		throw new Http404();
+	if (objects.length !== ids.length) {
+		const existsIds = objects.map(({id}) => id);
+
+		ids.forEach(id => {
+			if (!existsIds.includes(id)) {
+				throw new Http404(`not found "${id}"`);
+			}
+		});
 	}
 
-	if (file.type === FILE_TYPE.FILE) {
-		const stream = await s3.getObjectStream(file.path);
+	await Promise.all(objects.map(object => limit(async () => {
+		if (object.type === OBJECT_TYPE.FILE) {
+			files.push(object);
+			return;
+		}
 
-		res.set('Content-Disposition', contentDisposition(file.basename));
+		const deepFiles = await ObjectModel.findAll({
+			where: {
+				path: {[Op.like]: utils.generateLikeSyntax(object.path, {start: ''})},
+				type: OBJECT_TYPE.FILE,
+			},
+		});
+
+		files.push(...deepFiles);
+	})));
+
+	if (files.length === 1) {
+		// Forward S3 response.
+		const NOT_FORWARD_HEADERS = [
+			'Accept-Ranges',
+		];
+		const stream = await s3.getObjectStream(files[0].path);
+
+		res.set('Content-Disposition', contentDisposition(files[0].basename));
 
 		for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
 			const key = stream.Body.rawHeaders[index];
@@ -163,60 +195,12 @@ exports.downloadFile = async (req, res) => {
 		stream.Body.on('data', data => res.write(data));
 		stream.Body.on('end', () => res.end());
 	} else {
-		const files = await FileModel.findAll({
-			where: {
-				path: {[Op.like]: utils.generateLikeSyntax(file.path, {start: ''})},
-				type: FILE_TYPE.FILE,
-			},
-		});
-
 		await archiveFilesAndDownload({files, res});
 	}
 };
 
-/*
-	GET /api/files/:fileIds
- */
-exports.downloadFiles = async (req, res) => {
-	const limit = pLimit(1);
-	const fileOrFolderIds = Array.from(new Set(req.params[0].split(',').map(Number)));
-	const files = [];
-	const filesAndFolders = await FileModel.findAll({
-		where: {
-			id: {[Op.in]: fileOrFolderIds},
-		},
-	});
-
-	if (filesAndFolders.length !== fileOrFolderIds.length) {
-		const existsIds = filesAndFolders.map(({id}) => id);
-
-		fileOrFolderIds.forEach(id => {
-			if (!existsIds.includes(id)) {
-				throw new Http404(`not found "${id}"`);
-			}
-		});
-	}
-
-	await Promise.all(filesAndFolders.map(fileOrFolder => limit(async () => {
-		if (fileOrFolder.type === FILE_TYPE.FILE) {
-			files.push(fileOrFolder);
-			return;
-		}
-
-		const deepFiles = await FileModel.findAll({
-			where: {
-				path: {[Op.like]: utils.generateLikeSyntax(fileOrFolder.path, {start: ''})},
-				type: FILE_TYPE.FILE,
-			},
-		});
-
-		files.push(...deepFiles);
-	})));
-	await archiveFilesAndDownload({files, res});
-};
-
 /**
- * @param {Array<FileModel>} files
+ * @param {Array<ObjectModel>} files
  * @param {ServerResponse} res
  * @returns {Promise<void>}
  */
@@ -274,10 +258,10 @@ async function archiveFilesAndDownload({files, res}) {
 }
 
 /*
-	DELETE /api/files
+	DELETE /api/objects
  */
-exports.deleteFiles = async (req, res) => {
-	const checkResult = validateDeleteFilesQuery(req.query);
+exports.deleteObjects = async (req, res) => {
+	const checkResult = validateDeleteObjectsQuery(req.query);
 
 	if (checkResult !== true) {
 		throw new Http422('form validation failed', checkResult);
@@ -287,14 +271,14 @@ exports.deleteFiles = async (req, res) => {
 	const limit = pLimit(1);
 	const files = [];
 	const folders = [];
-	const filesAndFolders = await FileModel.findAll({
+	const objects = await ObjectModel.findAll({
 		where: {
 			id: {[Op.in]: ids},
 		},
 	});
 
-	if (filesAndFolders.length !== ids.length) {
-		const existsIds = filesAndFolders.map(({id}) => id);
+	if (objects.length !== ids.length) {
+		const existsIds = objects.map(({id}) => id);
 
 		ids.forEach(id => {
 			if (!existsIds.includes(id)) {
@@ -303,21 +287,21 @@ exports.deleteFiles = async (req, res) => {
 		});
 	}
 
-	await Promise.all(filesAndFolders.map(fileOrFolder => limit(async () => {
-		if (fileOrFolder.type === FILE_TYPE.FILE) {
-			files.push(fileOrFolder);
+	await Promise.all(objects.map(object => limit(async () => {
+		if (object.type === OBJECT_TYPE.FILE) {
+			files.push(object);
 		} else {
 			const [deepFiles, deepFolders] = await Promise.all([
-				FileModel.findAll({
+				ObjectModel.findAll({
 					where: {
-						type: FILE_TYPE.FILE,
-						path: {[Op.like]: utils.generateLikeSyntax(fileOrFolder.path, {start: ''})},
+						type: OBJECT_TYPE.FILE,
+						path: {[Op.like]: utils.generateLikeSyntax(object.path, {start: ''})},
 					},
 				}),
-				FileModel.findAll({
+				ObjectModel.findAll({
 					where: {
-						type: FILE_TYPE.FOLDER,
-						path: {[Op.like]: utils.generateLikeSyntax(fileOrFolder.path, {start: ''})},
+						type: OBJECT_TYPE.FOLDER,
+						path: {[Op.like]: utils.generateLikeSyntax(object.path, {start: ''})},
 					},
 				}),
 			]);
@@ -328,21 +312,25 @@ exports.deleteFiles = async (req, res) => {
 	})));
 
 	if (files.length) {
-		await s3.deleteObjects(files.map(file => file.path));
-		await FileModel.destroy({
-			where: {id: {[Op.in]: files.map(file => file.id)}},
-		});
+		await Promise.all([
+			s3.deleteObjects(files.map(file => file.path)),
+			ObjectModel.destroy({
+				where: {id: {[Op.in]: files.map(file => file.id)}},
+			}),
+		]);
 	}
 
 	if (folders.length) {
-		await s3.deleteObjects(
-			folders
-				.map(folder => folder.path)
-				.sort((a, b) => b.split('/').length - a.split('/').length),
-		);
-		await FileModel.destroy({
-			where: {id: {[Op.in]: folders.map(folder => folder.id)}},
-		});
+		await Promise.all([
+			s3.deleteObjects(
+				folders
+					.map(folder => folder.path)
+					.sort((a, b) => b.split('/').length - a.split('/').length),
+			),
+			ObjectModel.destroy({
+				where: {id: {[Op.in]: folders.map(folder => folder.id)}},
+			}),
+		]);
 	}
 
 	res.sendStatus(204);
