@@ -12,7 +12,7 @@ module.exports = {
 			data: (() => {
 				const formData = new FormData();
 
-				formData.set('file', file);
+				formData.set('file', file, encodeURIComponent(file.name));
 				return formData;
 			})(),
 		}),

@@ -56,8 +56,10 @@ exports.uploadFile = async (req, res) => {
 
 	await new Promise((resolve, reject) => {
 		bb.on('error', error => reject(error));
-		bb.on('file', async (name, file, {filename, mimeType}) => {
+		bb.on('file', async (name, file, {filename: encodedFilename, mimeType}) => {
 			try {
+				const filename = decodeURIComponent(encodedFilename);
+
 				object = new ObjectModel({
 					type: OBJECT_TYPE.FILE,
 					path: dirname ? `${dirname}/${filename}` : filename,
