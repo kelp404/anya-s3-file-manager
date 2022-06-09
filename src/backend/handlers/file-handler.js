@@ -63,7 +63,7 @@ exports.uploadFile = async (req, res) => {
 				object = new ObjectModel({
 					type: OBJECT_TYPE.FILE,
 					path: dirname ? `${dirname}/${filename}` : filename,
-					dirname: dirname ? `${dirname}/` : dirname,
+					dirname: dirname || '',
 					basename: filename,
 				});
 
@@ -76,17 +76,24 @@ exports.uploadFile = async (req, res) => {
 					) {
 						throw new Http409(error, {
 							frontendOperationCode: FRONTEND_OPERATION_CODE.SHOW_OBJECT_DUPLICATED_ALERT,
+							frontendOperationValue: object.path,
 						});
 					}
 
 					throw error;
 				}
 
-				await s3.upload(filename, file, {ContentType: mimeType});
-				const objectHeaders = await s3.headObject(object.path);
+				try {
+					await s3.upload(object.path, file, {ContentType: mimeType});
+					const objectHeaders = await s3.headObject(object.path);
 
-				object.size = objectHeaders.ContentLength;
-				object.lastModified = objectHeaders.LastModified;
+					object.size = objectHeaders.ContentLength;
+					object.lastModified = objectHeaders.LastModified;
+				} catch (error) {
+					await object.destroy();
+					throw error;
+				}
+
 				await object.save();
 				resolve();
 			} catch (error) {

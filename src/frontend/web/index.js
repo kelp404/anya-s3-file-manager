@@ -38,6 +38,7 @@ router.listen('ChangeSuccess', (action, toState, fromState) => {
 	if ([PUSH, REPLACE].includes(action)) {
 		const modalPages = [
 			'web.objects.details',
+			'web.objects.uploader',
 		];
 
 		if (modalPages.includes(toState.name)) {
@@ -46,6 +47,7 @@ router.listen('ChangeSuccess', (action, toState, fromState) => {
 
 		if (
 			(fromState.name === 'web.objects.details' && toState.name === 'web.objects')
+			|| (fromState.name === 'web.objects.uploader' && toState.name === 'web.objects')
 		) {
 			// From modal pages back to the parent.
 			return;

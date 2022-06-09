@@ -8,6 +8,7 @@ const expressRouter = new ExpressRouter();
 
 expressRouter.get('/', setNoCacheHeader, baseHandler.getBaseView);
 expressRouter.get('/objects', setNoCacheHeader, baseHandler.getBaseView);
+expressRouter.get('/objects/uploader', setNoCacheHeader, baseHandler.getBaseView);
 expressRouter.get(/^\/objects\/\d+$/, setNoCacheHeader, baseHandler.getBaseView);
 
 expressRouter.get('/api/objects', setNoCacheHeader, objectHandler.getObjects);
