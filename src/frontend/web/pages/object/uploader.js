@@ -7,7 +7,7 @@ const _ = require('../../../languages');
 module.exports = class UploaderPage extends Base {
 	constructor(props) {
 		super(props);
-		this.myRoute = getRouter().findRouteByName('web.files.uploader');
+		this.myRoute = getRouter().findRouteByName('web.objects.uploader');
 		this.state.isShowModal = true;
 	}
 
@@ -25,7 +25,7 @@ module.exports = class UploaderPage extends Base {
 
 	onHideModal = () => {
 		getRouter().go({
-			name: 'web.files',
+			name: 'web.objects',
 			params: this.props.params,
 		});
 	};

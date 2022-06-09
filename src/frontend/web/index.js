@@ -37,7 +37,7 @@ router.listen('ChangeSuccess', (action, toState, fromState) => {
 	// Scroll to top.
 	if ([PUSH, REPLACE].includes(action)) {
 		const modalPages = [
-			'web.files.details',
+			'web.objects.details',
 		];
 
 		if (modalPages.includes(toState.name)) {
@@ -45,7 +45,7 @@ router.listen('ChangeSuccess', (action, toState, fromState) => {
 		}
 
 		if (
-			(fromState.name === 'web.files.details' && toState.name === 'web.files')
+			(fromState.name === 'web.objects.details' && toState.name === 'web.objects')
 		) {
 			// From modal pages back to the parent.
 			return;
