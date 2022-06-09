@@ -1,26 +1,101 @@
 const path = require('path');
 const archiver = require('archiver');
+const busboy = require('busboy');
 const config = require('config');
 const contentDisposition = require('content-disposition');
 const pLimit = require('p-limit');
-const {Op} = require('sequelize');
+const {Op, UniqueConstraintError} = require('sequelize');
 const {
 	OBJECT_TYPE,
+	FRONTEND_OPERATION_CODE,
 } = require('../../shared/constants');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
 const {
 	validateDownloadFilesQuery,
+	validateUploadFileQuery,
 } = require('../validators/file-validator');
 const ObjectModel = require('../models/data/object-model');
 const {
 	Http404,
+	Http409,
 	Http422,
 } = require('../models/errors');
 
 const {
 	S3,
 } = config;
+
+/*
+	POST /api/files
+ */
+exports.uploadFile = async (req, res) => {
+	const checkResult = validateUploadFileQuery(req.query);
+
+	if (checkResult !== true) {
+		throw new Http422('form validation failed', checkResult);
+	}
+
+	const {dirname = ''} = req.query;
+
+	if (dirname) {
+		const folder = await ObjectModel.findOne({
+			where: {
+				type: OBJECT_TYPE.FOLDER,
+				path: `${dirname}/`,
+			},
+		});
+
+		if (!folder) {
+			throw new Http404();
+		}
+	}
+
+	const bb = busboy({headers: req.headers});
+	let object;
+
+	await new Promise((resolve, reject) => {
+		bb.on('error', error => reject(error));
+		bb.on('file', async (name, file, {filename, mimeType}) => {
+			try {
+				object = new ObjectModel({
+					type: OBJECT_TYPE.FILE,
+					path: dirname ? `${dirname}/${filename}` : filename,
+					dirname: dirname ? `${dirname}/` : dirname,
+					basename: filename,
+				});
+
+				try {
+					object.save();
+				} catch (error) {
+					if (
+						error instanceof UniqueConstraintError
+						&& (error.errors || [])[0]?.path === 'path'
+					) {
+						throw new Http409(error, {
+							frontendOperationCode: FRONTEND_OPERATION_CODE.SHOW_OBJECT_DUPLICATED_ALERT,
+						});
+					}
+
+					throw error;
+				}
+
+				await s3.upload(filename, file, {ContentType: mimeType});
+				const objectHeaders = await s3.headObject(object.path);
+
+				object.size = objectHeaders.ContentLength;
+				object.lastModified = objectHeaders.LastModified;
+				await object.save();
+				resolve();
+			} catch (error) {
+				reject(error);
+			}
+		});
+		req.pipe(bb);
+	});
+
+	res.status(201).json(object);
+};
 
 /*
 	GET /api/files
@@ -46,7 +121,7 @@ exports.downloadFiles = async (req, res) => {
 
 		ids.forEach(id => {
 			if (!existsIds.includes(id)) {
-				throw new Http404(`not found "${id}"`);
+				throw new Http404(`not found object "${id}"`);
 			}
 		});
 	}

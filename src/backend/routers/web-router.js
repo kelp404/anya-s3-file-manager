@@ -14,5 +14,6 @@ expressRouter.get('/api/objects', setNoCacheHeader, objectHandler.getObjects);
 expressRouter.get('/api/objects/:objectId(\\d+)', setNoCacheHeader, objectHandler.getObject);
 expressRouter.delete('/api/objects', objectHandler.deleteObjects);
 expressRouter.get('/api/files', fileHandler.downloadFiles);
+expressRouter.post('/api/files', fileHandler.uploadFile);
 
 module.exports = expressRouter.router;

@@ -138,6 +138,18 @@ exports.deleteObjects = (paths, options) => s3
 	})
 	.promise();
 
+/*
+	https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property
+ */
+exports.upload = (path, body, options) => s3
+	.upload({
+		...options,
+		Bucket: S3.BUCKET,
+		Key: path,
+		Body: body,
+	})
+	.promise();
+
 exports.getObjectStream = path => {
 	const client = new S3Client({
 		region: S3.REGION,
