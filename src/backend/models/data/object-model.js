@@ -1,6 +1,6 @@
 const path = require('path');
 const lodash = require('lodash');
-const {DataTypes} = require('sequelize');
+const {DataTypes, NOW} = require('sequelize');
 const {OBJECT_TYPE} = require('../../../shared/constants');
 const {connectDatabase} = require('../../common/database');
 
@@ -46,7 +46,8 @@ const attributes = {
 	},
 	lastModified: {
 		type: DataTypes.DATE,
-		allowNull: true,
+		allowNull: false,
+		defaultValue: NOW,
 	},
 	size: {
 		type: DataTypes.BIGINT,
