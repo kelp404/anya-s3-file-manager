@@ -21,7 +21,7 @@ const api = require('../../../core/apis/web');
 const utils = require('../../../core/utils');
 const _ = require('../../../languages');
 
-module.exports = class ObjectPage extends Base {
+module.exports = class NewFolderPage extends Base {
 	static propTypes = {
 		params: PropTypes.object.isRequired,
 	};
