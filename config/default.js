@@ -21,7 +21,6 @@ module.exports = {
 		SECRET: null,
 		BUCKET: null,
 		REGION: null,
-		DATABASE_PATH: '_anya_data.db',
 	},
 	GZIP_FILE_PATTERN: /\.(js|css|svg)$/,
 	IS_USE_DEBUG_ASSETS: true,

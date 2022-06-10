@@ -14,44 +14,6 @@ const s3 = new AWS.S3({
 	region: S3.REGION,
 });
 
-/**
- * @returns {Promise<null|
- * 		{
- * 			Body: Buffer,
- * 			LastModified: date,
- * 			ContentLength: number,
- * 			ContentType: string,
- * 			Metadata: {}
- * 		}
- * >}
- */
-exports.downloadDatabaseFromS3 = async ({logger} = {}) => {
-	const isShowLog = typeof logger === 'function';
-
-	try {
-		if (isShowLog) {
-			logger('Start download database from S3.');
-		}
-
-		const result = await s3
-			.getObject({Bucket: S3.BUCKET, Key: S3.DATABASE_PATH})
-			.promise();
-
-		if (isShowLog) {
-			logger('Finish download database from S3.');
-		}
-
-		return result;
-	} catch (error) {
-		if (error.statusCode === 404) {
-			logger('Not found database on S3.');
-			return null;
-		}
-
-		throw error;
-	}
-};
-
 exports.syncObjectsFromS3 = async () => {
 	const start = new Date();
 	const scanObjects = async continuationToken => {
