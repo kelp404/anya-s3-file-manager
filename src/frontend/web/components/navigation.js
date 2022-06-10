@@ -51,9 +51,6 @@ module.exports = class Navigation extends Base {
 									{_('Objects')}
 								</Link>
 							</li>
-							<li className="nav-item">
-								<a className="nav-link" href="/settings">{_('Settings')}</a>
-							</li>
 						</ul>
 					</div>
 				</div>
