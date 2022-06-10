@@ -6,6 +6,11 @@ const PropTypes = require('prop-types');
 const React = require('react');
 const Modal = require('react-bootstrap/Modal').default;
 const {
+	FRONTEND_OPERATION_CODE: {
+		SHOW_OBJECT_DUPLICATED_ALERT,
+	},
+} = require('../../../../shared/constants');
+const {
 	createFolderFormSchema,
 } = require('../../../../shared/validation/form-schemas/object');
 const {
@@ -28,6 +33,7 @@ module.exports = class ObjectPage extends Base {
 			validateCreateFolderForm: utils.makeFormikValidator(validateCreateFolderForm),
 		};
 		this.state.isShowModal = true;
+		this.state.pathDuplicatedAlertMessage = null;
 	}
 
 	componentDidMount() {
@@ -50,6 +56,7 @@ module.exports = class ObjectPage extends Base {
 	onSubmitCreateFolderForm = async values => {
 		try {
 			nprogress.start();
+			this.setState({pathDuplicatedAlertMessage: null});
 			await api.object.createFolder(values);
 			getRouter().go(
 				{
@@ -60,6 +67,18 @@ module.exports = class ObjectPage extends Base {
 			);
 		} catch (error) {
 			nprogress.done();
+
+			if (error.response?.data?.extra?.frontendOperationCode === SHOW_OBJECT_DUPLICATED_ALERT) {
+				this.setState({
+					pathDuplicatedAlertMessage: _(
+						'The path "{0}" is already exists.',
+						[error.response?.data?.extra?.frontendOperationValue],
+					),
+				});
+
+				return;
+			}
+
 			utils.renderError(error);
 		}
 	};
@@ -72,7 +91,7 @@ module.exports = class ObjectPage extends Base {
 	};
 
 	renderCreateFolderForm = ({errors, submitCount, initialValues}) => {
-		const {$isApiProcessing} = this.state;
+		const {$isApiProcessing, pathDuplicatedAlertMessage} = this.state;
 		const isSubmitted = submitCount > 0;
 
 		return (
@@ -84,16 +103,28 @@ module.exports = class ObjectPage extends Base {
 				<Modal.Body>
 					<div className="mb-3">
 						<label htmlFor="input-basename" className="col-form-label">{_('Path')}</label>
-						<div className="input-group mb-3">
+						<div
+							className={classnames(
+								'input-group mb-3',
+								{'has-validation': (errors.basename && isSubmitted) || pathDuplicatedAlertMessage},
+							)}
+						>
 							{initialValues.dirname && <span className="input-group-text">{initialValues.dirname}/</span>}
 							<Field
 								autoFocus
 								type="text" id="input-basename" name="basename"
-								className={classnames('form-control', {'is-invalid': errors.basename && isSubmitted})}
+								placeholder="Folder name"
+								className={classnames(
+									'form-control',
+									{'is-invalid': (errors.basename && isSubmitted) || pathDuplicatedAlertMessage},
+								)}
 								maxLength={createFolderFormSchema.basename.max}/>
 							{
-								errors.basename && isSubmitted && (
-									<div className="invalid-feedback">{errors.basename}</div>
+								((errors.basename && isSubmitted) || pathDuplicatedAlertMessage) && (
+									<div className="invalid-feedback">
+										{errors.basename && isSubmitted && <div>{errors.basename}</div>}
+										{pathDuplicatedAlertMessage && <div>{pathDuplicatedAlertMessage}</div>}
+									</div>
 								)
 							}
 						</div>
