@@ -15,6 +15,7 @@ module.exports = {
 	IS_LOG_REQUEST: true,
 	IS_LOG_ERROR: true,
 	IS_LOG_SQL: true,
+	IS_SYNC_S3_OBJECTS_ON_LAUNCH: true,
 	S3: {
 		KEY: null,
 		SECRET: null,

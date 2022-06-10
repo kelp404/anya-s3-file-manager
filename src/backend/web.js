@@ -6,9 +6,10 @@ const bluebird = require('bluebird');
 const config = require('config');
 const sqlite3 = require('sqlite3').verbose();
 const {ENVIRONMENT_MODE} = require('../shared/constants');
+const {syncObjectsFromS3} = require("./common/s3");
 
 const {
-	DATABASE_PATH, S3, MODE, EXPRESS_SERVER,
+	DATABASE_PATH, S3, MODE, EXPRESS_SERVER, IS_SYNC_S3_OBJECTS_ON_LAUNCH,
 } = config;
 const LOCAL_DATABASE_PATH = path.join(__dirname, '..', '..', DATABASE_PATH);
 
@@ -87,8 +88,11 @@ async function initialDatabase() {
 
 	console.log(migrationResult.toString());
 	connectDatabase();
-	console.log('Sync objects from S3.');
-	await syncObjectsFromS3();
+
+	if (IS_SYNC_S3_OBJECTS_ON_LAUNCH) {
+		console.log('Sync objects from S3.');
+		await syncObjectsFromS3();
+	}
 }
 
 function launchServer() {
