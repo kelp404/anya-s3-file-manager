@@ -391,8 +391,13 @@ module.exports = class ObjectsPage extends Base {
 									</button>
 								</div>
 								<div>
-									<button
-										type="button" className="btn btn-sm btn-outline-success ms-2"
+									<Link
+										className={classnames('btn btn-sm btn-outline-secondary', {disabled: $isApiProcessing})}
+										to={{name: 'web.objects.new-folder', params}}
+										style={{lineHeight: 'initial'}}
+									>
+										{_('New folder')}
+									</Link>
 									<Link
 										className={classnames('btn btn-sm btn-outline-success ms-2', {disabled: $isApiProcessing})}
 										to={{name: 'web.objects.uploader', params}}

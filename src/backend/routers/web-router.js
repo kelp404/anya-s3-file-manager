@@ -8,11 +8,12 @@ const expressRouter = new ExpressRouter();
 
 expressRouter.get('/', setNoCacheHeader, baseHandler.getBaseView);
 expressRouter.get('/objects', setNoCacheHeader, baseHandler.getBaseView);
+expressRouter.get('/objects/new-folder', setNoCacheHeader, baseHandler.getBaseView);
 expressRouter.get('/objects/uploader', setNoCacheHeader, baseHandler.getBaseView);
 expressRouter.get(/^\/objects\/\d+$/, setNoCacheHeader, baseHandler.getBaseView);
 
 expressRouter.get('/api/objects', setNoCacheHeader, objectHandler.getObjects);
-expressRouter.post('/api/objects', objectHandler.createObject);
+expressRouter.post('/api/objects', objectHandler.createFolder);
 expressRouter.delete('/api/objects', objectHandler.deleteObjects);
 expressRouter.get('/api/objects/:objectId(\\d+)', setNoCacheHeader, objectHandler.getObject);
 expressRouter.get('/api/files', fileHandler.downloadFiles);

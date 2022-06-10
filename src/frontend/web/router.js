@@ -66,6 +66,18 @@ module.exports = new Router({
 			),
 		},
 		{
+			name: 'web.objects.new-folder',
+			uri: '/new-folder',
+			dismissalDelay: 300,
+			onEnter() {
+				document.title = `${_('New folder')} - ${webTitle}`;
+			},
+			loadComponent: () => import(
+				/* webpackChunkName: "web-new-folder" */
+				'./pages/object/new-folder'
+			),
+		},
+		{
 			name: 'not-found',
 			uri: '.*',
 			component: require('./pages/shared/not-found'),

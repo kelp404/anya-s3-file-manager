@@ -1,12 +1,12 @@
 const {validator} = require('.');
 const {
 	getObjectsFormSchema,
-	createObjectFormSchema,
+	createFolderFormSchema,
 	deleteObjectsFormSchema,
 } = require('../../shared/validation/form-schemas/object');
 
 module.exports = {
 	validateGetObjectsQuery: validator.compile(getObjectsFormSchema),
-	validateCreateObjectBody: validator.compile(createObjectFormSchema),
+	validateCreateObjectBody: validator.compile(createFolderFormSchema),
 	validateDeleteObjectsQuery: validator.compile(deleteObjectsFormSchema),
 };

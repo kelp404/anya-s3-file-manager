@@ -23,7 +23,7 @@ module.exports = {
 			url: `${BASE_PATH}/objects`,
 			params: {dirname, keyword, after, limit},
 		}),
-		createObject: ({dirname, basename}) => sendRequest({
+		createFolder: ({dirname, basename}) => sendRequest({
 			method: 'post',
 			url: `${BASE_PATH}/objects`,
 			data: {dirname, basename},

@@ -129,7 +129,7 @@ exports.getObject = async (req, res) => {
 /*
 	POST /api/objects
  */
-exports.createObject = async (req, res) => {
+exports.createFolder = async (req, res) => {
 	const checkResult = validateCreateObjectBody(req.body);
 
 	if (checkResult !== true) {

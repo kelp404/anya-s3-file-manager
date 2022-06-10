@@ -14,7 +14,7 @@ exports.getObjectsFormSchema = {
 	},
 };
 
-exports.createObjectFormSchema = {
+exports.createFolderFormSchema = {
 	dirname: objectSchema.dirname,
 	basename: objectSchema.basename,
 };
