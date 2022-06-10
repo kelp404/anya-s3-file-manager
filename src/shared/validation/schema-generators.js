@@ -1,8 +1,4 @@
-const config = require('config');
-
-const {
-	PAGINATION,
-} = config;
+const PAGINATION_MAX_LIMIT = 100;
 const MAX_ID_VALUE = 0x7FFFFFFF;
 
 function generateIdSchema({fieldName = 'id'} = {}) {
@@ -81,7 +77,7 @@ function generateCursorPaginationSchema() {
 			optional: true,
 			convert: true,
 			min: 1,
-			max: PAGINATION.MAX_LIMIT,
+			max: PAGINATION_MAX_LIMIT,
 			integer: true,
 		},
 	};
