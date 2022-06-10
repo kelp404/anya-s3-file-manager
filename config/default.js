@@ -34,7 +34,4 @@ module.exports = {
 	PAGINATION: {
 		DEFAULT_LIMIT: 50,
 	},
-	LIMIT: {
-		FILE_SIZE: 900 * 1024 * 1024, // 900MB
-	},
 };
