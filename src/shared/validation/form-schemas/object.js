@@ -15,7 +15,8 @@ exports.getObjectsFormSchema = {
 };
 
 exports.createObjectFormSchema = {
-	path: objectSchema.path,
+	dirname: objectSchema.dirname,
+	basename: objectSchema.basename,
 };
 
 exports.deleteObjectsFormSchema = generateIdsSchema();

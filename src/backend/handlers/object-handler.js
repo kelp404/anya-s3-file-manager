@@ -136,10 +136,10 @@ exports.createObject = async (req, res) => {
 		throw new Http422('form validation failed', checkResult);
 	}
 
-	const {path} = req.body;
+	const {dirname, basename} = req.body;
 	const object = new ObjectModel({
 		type: OBJECT_TYPE.FOLDER,
-		path: path.slice(-1) === '/' ? path : `${path}/`,
+		path: dirname ? `${dirname}/${basename}/` : `${basename}/`,
 	});
 
 	if (object.dirname) {

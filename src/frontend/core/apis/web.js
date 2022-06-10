@@ -23,10 +23,10 @@ module.exports = {
 			url: `${BASE_PATH}/objects`,
 			params: {dirname, keyword, after, limit},
 		}),
-		createObject: ({path}) => sendRequest({
+		createObject: ({dirname, basename}) => sendRequest({
 			method: 'post',
 			url: `${BASE_PATH}/objects`,
-			data: {path},
+			data: {dirname, basename},
 		}),
 		getObject: ({objectId}) => sendRequest({
 			method: 'get',
