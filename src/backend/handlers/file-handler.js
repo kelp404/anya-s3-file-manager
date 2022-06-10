@@ -63,8 +63,6 @@ exports.uploadFile = async (req, res) => {
 				object = new ObjectModel({
 					type: OBJECT_TYPE.FILE,
 					path: dirname ? `${dirname}/${filename}` : filename,
-					dirname: dirname || '',
-					basename: filename,
 				});
 
 				try {

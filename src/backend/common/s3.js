@@ -1,4 +1,3 @@
-const path = require('path');
 const AWS = require('aws-sdk');
 const {S3Client, GetObjectCommand} = require('@aws-sdk/client-s3');
 const config = require('config');
@@ -60,18 +59,12 @@ exports.syncObjectsFromS3 = async () => {
 		const result = await s3
 			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken})
 			.promise();
-		const convertS3Object = ({Key, Size, LastModified}) => {
-			const dirname = path.dirname(Key);
-
-			return {
-				type: Key.slice(-1) === '/' ? OBJECT_TYPE.FOLDER : OBJECT_TYPE.FILE,
-				path: Key,
-				dirname: dirname === '.' ? '' : dirname,
-				basename: path.basename(Key),
-				lastModified: LastModified,
-				size: Size,
-			};
-		};
+		const convertS3Object = ({Key, Size, LastModified}) => ({
+			type: Key.slice(-1) === '/' ? OBJECT_TYPE.FOLDER : OBJECT_TYPE.FILE,
+			path: Key,
+			lastModified: LastModified,
+			size: Size,
+		});
 
 		await Promise.all([
 			ObjectModel.bulkCreate(

@@ -1,3 +1,4 @@
+const path = require('path');
 const lodash = require('lodash');
 const {DataTypes} = require('sequelize');
 const {OBJECT_TYPE} = require('../../../shared/constants');
@@ -15,6 +16,13 @@ const attributes = {
 	path: {
 		type: new DataTypes.STRING(1024),
 		allowNull: false,
+		set(value) {
+			const {dir, base} = path.parse(value);
+
+			this.setDataValue('path', value);
+			this.setDataValue('dirname', dir);
+			this.setDataValue('basename', base);
+		},
 	},
 	/**
 	 * The folder name.
