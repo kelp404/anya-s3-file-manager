@@ -10,6 +10,7 @@ And supports find files by keywords.
 git clone https://github.com/kelp404/anya-s3-file-manager.git
 cd anya-s3-file-manager
 npm install
+npm run build
 ```
 
 
