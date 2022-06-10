@@ -1,5 +1,5 @@
 module.exports = {
-	// Please DON'T public anya s3 file manager.
+	// Please DON'T public this website to anonymous.
 	// Please DON'T commit S3 secret to the public repository.
 	S3: {
 		KEY: null,
