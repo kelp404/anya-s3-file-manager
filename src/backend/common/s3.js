@@ -143,6 +143,17 @@ exports.upload = (path, body, options) => s3
 	})
 	.promise();
 
+/*
+	https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#putObject-property
+ */
+exports.putObject = (path, options) => s3
+	.putObject({
+		...options,
+		Bucket: S3.BUCKET,
+		Key: path,
+	})
+	.promise();
+
 exports.getObjectStream = path => {
 	const client = new S3Client({
 		region: S3.REGION,

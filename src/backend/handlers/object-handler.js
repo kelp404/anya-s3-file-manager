@@ -1,19 +1,22 @@
 const config = require('config');
 const pLimit = require('p-limit');
-const {Op} = require('sequelize');
+const {Op, UniqueConstraintError} = require('sequelize');
 const {
 	OBJECT_TYPE,
+	FRONTEND_OPERATION_CODE,
 } = require('../../shared/constants');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
 const {
 	validateGetObjectsQuery,
+	validateCreateObjectBody,
 	validateDeleteObjectsQuery,
 } = require('../validators/object-validator');
 const ObjectModel = require('../models/data/object-model');
 const {
 	Http404,
 	Http422,
+	Http409,
 } = require('../models/errors');
 
 const {
@@ -121,6 +124,56 @@ exports.getObject = async (req, res) => {
 		...object.toJSON(),
 		objectHeaders,
 	});
+};
+
+/*
+	POST /api/objects
+ */
+exports.createObject = async (req, res) => {
+	const checkResult = validateCreateObjectBody(req.body);
+
+	if (checkResult !== true) {
+		throw new Http422('form validation failed', checkResult);
+	}
+
+	const {path} = req.body;
+	const object = new ObjectModel({
+		type: OBJECT_TYPE.FOLDER,
+		path: path.slice(-1) === '/' ? path : `${path}/`,
+	});
+
+	if (object.dirname) {
+		const parent = await ObjectModel.findOne({
+			where: {
+				type: OBJECT_TYPE.FOLDER,
+				path: `${object.dirname}/`,
+			},
+		});
+
+		if (!parent) {
+			throw new Http404(`not found parent "${object.dirname}"`);
+		}
+	}
+
+	try {
+		await object.save();
+	} catch (error) {
+		if (
+			error instanceof UniqueConstraintError
+			&& (error.errors || [])[0]?.path === 'path'
+		) {
+			throw new Http409(error, {
+				frontendOperationCode: FRONTEND_OPERATION_CODE.SHOW_OBJECT_DUPLICATED_ALERT,
+				frontendOperationValue: object.path,
+			});
+		}
+
+		throw error;
+	}
+
+	await s3.putObject(object.path);
+
+	res.status(201).json(object);
 };
 
 /*

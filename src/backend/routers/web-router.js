@@ -12,8 +12,9 @@ expressRouter.get('/objects/uploader', setNoCacheHeader, baseHandler.getBaseView
 expressRouter.get(/^\/objects\/\d+$/, setNoCacheHeader, baseHandler.getBaseView);
 
 expressRouter.get('/api/objects', setNoCacheHeader, objectHandler.getObjects);
-expressRouter.get('/api/objects/:objectId(\\d+)', setNoCacheHeader, objectHandler.getObject);
+expressRouter.post('/api/objects', objectHandler.createObject);
 expressRouter.delete('/api/objects', objectHandler.deleteObjects);
+expressRouter.get('/api/objects/:objectId(\\d+)', setNoCacheHeader, objectHandler.getObject);
 expressRouter.get('/api/files', fileHandler.downloadFiles);
 expressRouter.post('/api/files', fileHandler.uploadFile);
 
