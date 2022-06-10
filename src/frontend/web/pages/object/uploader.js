@@ -132,7 +132,7 @@ module.exports = class UploaderPage extends Base {
 				onHide={this.onHideModal}
 			>
 				<Modal.Header closeButton>
-					<Modal.Title>{_('Upload')}</Modal.Title>
+					<Modal.Title>{_('Upload files')}</Modal.Title>
 				</Modal.Header>
 
 				<Modal.Body>

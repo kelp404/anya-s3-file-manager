@@ -1,3 +1,4 @@
+const classnames = require('classnames');
 const nprogress = require('nprogress');
 const PropTypes = require('prop-types');
 const React = require('react');
@@ -202,13 +203,6 @@ module.exports = class ObjectsPage extends Base {
 		}
 	};
 
-	onShowUploader = () => {
-		getRouter().go({
-			name: 'web.objects.uploader',
-			params: this.props.params,
-		});
-	};
-
 	onLoadNextPage = async () => {
 		try {
 			const {objectTable} = this.state;
@@ -328,6 +322,7 @@ module.exports = class ObjectsPage extends Base {
 	};
 
 	render() {
+		const {params} = this.props;
 		const {breadcrumb, keyword, objectTable, $isApiProcessing} = this.state;
 		const hasAnyChecked = this.hasAnyChecked();
 
@@ -398,12 +393,13 @@ module.exports = class ObjectsPage extends Base {
 								<div>
 									<button
 										type="button" className="btn btn-sm btn-outline-success ms-2"
+									<Link
+										className={classnames('btn btn-sm btn-outline-success ms-2', {disabled: $isApiProcessing})}
+										to={{name: 'web.objects.uploader', params}}
 										style={{lineHeight: 'initial'}}
-										disabled={$isApiProcessing}
-										onClick={this.onShowUploader}
 									>
 										{_('Upload')}
-									</button>
+									</Link>
 								</div>
 							</div>
 

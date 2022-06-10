@@ -5,6 +5,11 @@ a:not(.nav-link), .btn-link {
     text-decoration: underline;
   }
 }
+a {
+  &.btn, &.active, &:hover, &:focus {
+    text-decoration: none !important;
+  }
+}
 
 nav.navbar {
   opacity: 0.97;

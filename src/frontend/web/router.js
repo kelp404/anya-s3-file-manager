@@ -58,7 +58,7 @@ module.exports = new Router({
 			uri: '/uploader',
 			dismissalDelay: 300,
 			onEnter() {
-				document.title = `${_('Upload')} - ${webTitle}`;
+				document.title = `${_('Upload files')} - ${webTitle}`;
 			},
 			loadComponent: () => import(
 				/* webpackChunkName: "web-uploader" */
