@@ -85,7 +85,7 @@ module.exports = class UploaderPage extends Base {
 	onUploadFiles = async () => {
 		try {
 			const {params} = this.props;
-			const uploadLimit = pLimit(3);
+			const uploadLimit = pLimit(1);
 			const updateStateLimit = pLimit(1);
 			let hasError;
 			const updateFileState = (fileId, fields) => new Promise(resolve => {
