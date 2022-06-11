@@ -115,8 +115,6 @@ exports.downloadFiles = async (req, res) => {
 	}
 
 	const {ids} = req.query;
-	const limit = pLimit(1);
-	const files = [];
 	const objects = await ObjectModel.findAll({
 		where: {
 			id: {[Op.in]: ids},
@@ -131,32 +129,18 @@ exports.downloadFiles = async (req, res) => {
 				throw new Http404(`not found object "${id}"`);
 			}
 		});
+
+		throw new Http404(`not found "${ids}"`);
 	}
 
-	await Promise.all(objects.map(object => limit(async () => {
-		if (object.type === OBJECT_TYPE.FILE) {
-			files.push(object);
-			return;
-		}
-
-		const deepFiles = await ObjectModel.findAll({
-			where: {
-				path: {[Op.like]: utils.generateLikeSyntax(object.path, {start: ''})},
-				type: OBJECT_TYPE.FILE,
-			},
-		});
-
-		files.push(...deepFiles);
-	})));
-
-	if (files.length === 1) {
+	if (objects.length === 1 && objects[0].type === OBJECT_TYPE.FILE) {
 		// Forward S3 response.
 		const NOT_FORWARD_HEADERS = [
 			'Accept-Ranges',
 		];
-		const stream = await s3.getObjectStream(files[0].path);
+		const stream = await s3.getObjectStream(objects[0].path);
 
-		res.set('Content-Disposition', contentDisposition(files[0].basename));
+		res.set('Content-Disposition', contentDisposition(objects[0].basename));
 
 		for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
 			const key = stream.Body.rawHeaders[index];
@@ -172,6 +156,25 @@ exports.downloadFiles = async (req, res) => {
 		stream.Body.on('data', data => res.write(data));
 		stream.Body.on('end', () => res.end());
 	} else {
+		const files = [];
+		const limit = pLimit(1);
+
+		await Promise.all(objects.map(object => limit(async () => {
+			if (object.type === OBJECT_TYPE.FILE) {
+				files.push(object);
+				return;
+			}
+
+			const deepFiles = await ObjectModel.findAll({
+				where: {
+					path: {[Op.like]: utils.generateLikeSyntax(object.path, {start: ''})},
+					type: OBJECT_TYPE.FILE,
+				},
+			});
+
+			files.push(...deepFiles);
+		})));
+
 		await archiveFilesAndDownload({files, res});
 	}
 };
