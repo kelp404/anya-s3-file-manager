@@ -77,10 +77,20 @@ module.exports = class ObjectPage extends Base {
 			return (
 				<div className="col-12">
 					<img
-						className="rounded mx-auto d-block"
+						className="rounded mw-100 mx-auto d-block"
 						src={`/api/files?ids=${object.id}`}
 						style={{maxHeight: '300px'}}
 					/>
+				</div>
+			);
+		}
+
+		if (/^video\//.test(contentType)) {
+			return (
+				<div className="col-12">
+					<video controls className="mw-100 d-block mx-auto" style={{maxHeight: '300px'}}>
+						<source src={`/api/files?ids=${object.id}`} type={contentType}/>
+					</video>
 				</div>
 			);
 		}
