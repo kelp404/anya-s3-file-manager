@@ -6,7 +6,8 @@ const PropTypes = require('prop-types');
 const React = require('react');
 const Modal = require('react-bootstrap/Modal').default;
 const utils = require('../../../core/utils');
-const SuccessCheckmark = require('../../../core/components/success-checkmark');
+const SuccessIcon = require('../../../core/components/success-icon');
+const ErrorIcon = require('../../../core/components/error-icon');
 const api = require('../../../core/apis/web');
 const Base = require('../../../core/pages/base');
 const _ = require('../../../languages');
@@ -21,6 +22,7 @@ module.exports = class UploaderPage extends Base {
 	constructor(props) {
 		super(props);
 		this.myRoute = getRouter().findRouteByName('web.objects.uploader');
+		this.isNeedReloadWhenGoBackToParent = false;
 		this.files = [];
 		this.state.files = [];
 		this.state.isShowModal = true;
@@ -39,10 +41,13 @@ module.exports = class UploaderPage extends Base {
 	}
 
 	onHideModal = () => {
-		getRouter().go({
-			name: 'web.objects',
-			params: this.props.params,
-		});
+		getRouter().go(
+			{
+				name: 'web.objects',
+				params: this.props.params,
+			},
+			{reload: this.isNeedReloadWhenGoBackToParent},
+		);
 	};
 
 	onAddFiles = event => {
@@ -80,35 +85,56 @@ module.exports = class UploaderPage extends Base {
 	onUploadFiles = async () => {
 		try {
 			const {params} = this.props;
-			const limit = pLimit(3);
+			const uploadLimit = pLimit(3);
+			const updateStateLimit = pLimit(1);
+			let hasError;
+			const updateFileState = (fileId, fields) => new Promise(resolve => {
+				this.setState(
+					prevState => {
+						const index = prevState.files.findIndex(({id}) => fileId === id);
+
+						if (index < 0) {
+							return null;
+						}
+
+						return {
+							files: [
+								...prevState.files.slice(0, index),
+								{...prevState.files[index], ...fields},
+								...prevState.files.slice(index + 1),
+							],
+						};
+					},
+					resolve,
+				);
+			});
 
 			nprogress.start();
-			await Promise.all(this.files.map(file => limit(async () => {
-				await api.file.uploadFile({file, dirname: params.dirname});
+			await Promise.all(this.files.map(file => uploadLimit(async () => {
+				let isUploadSuccess;
 
-				this.setState(prevState => {
-					const index = prevState.files.findIndex(({id}) => file.id === id);
+				try {
+					await api.file.uploadFile({file, dirname: params.dirname});
+					isUploadSuccess = true;
+				} catch (_) {
+					isUploadSuccess = false;
+					hasError = true;
+				}
 
-					if (index < 0) {
-						return null;
-					}
-
-					return {
-						files: [
-							...prevState.files.slice(0, index),
-							{
-								...prevState.files[index],
-								isDone: true,
-							},
-							...prevState.files.slice(index + 1),
-						],
-					};
-				});
+				await updateStateLimit(() =>
+					updateFileState(file.id, {isSuccess: isUploadSuccess, isFailed: !isUploadSuccess}),
+				);
 			})));
-			getRouter().go(
-				{name: 'web.objects', params},
-				{reload: true},
-			);
+
+			this.isNeedReloadWhenGoBackToParent = true;
+			if (hasError) {
+				nprogress.done();
+			} else {
+				getRouter().go(
+					{name: 'web.objects', params},
+					{reload: true},
+				);
+			}
 		} catch (error) {
 			nprogress.done();
 			utils.renderError(error);
@@ -161,10 +187,11 @@ module.exports = class UploaderPage extends Base {
 											<span className="ms-2">
 												<small className="text-muted">{utils.formatSize(file.size)}</small>
 											</span>
-											{file.isDone && <span><SuccessCheckmark className="small"/></span>}
+											{file.isSuccess && <span><SuccessIcon className="ms-2"/></span>}
+											{file.isFailed && <span><ErrorIcon className="ms-2"/></span>}
 										</div>
 										<button
-											disabled={$isApiProcessing || file.isDone}
+											disabled={$isApiProcessing}
 											data-file-id={file.id}
 											type="button"
 											className="btn btn-sm btn-outline-danger"

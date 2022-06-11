@@ -2,7 +2,7 @@ const classnames = require('classnames');
 const PropTypes = require('prop-types');
 const React = require('react');
 
-module.exports = class SuccessCheckmark extends React.Component {
+module.exports = class ErrorIcon extends React.Component {
 	static propTypes = {
 		className: PropTypes.any,
 	};
@@ -19,13 +19,16 @@ module.exports = class SuccessCheckmark extends React.Component {
 		const {className} = this.props;
 
 		return (
-			<div className={classnames('success-checkmark', className)}>
-				<div className="check-icon">
-					<span className="icon-line line-tip"/>
-					<span className="icon-line line-long"/>
-					<div className="icon-circle"/>
-					<div className="icon-fix"/>
-				</div>
+			<div
+				className={classnames(
+					'swal2-icon swal2-error swal2-icon-show d-flex',
+					className,
+				)}
+			>
+				<span className="swal2-x-mark">
+					<span className="swal2-x-mark-line-left"/>
+					<span className="swal2-x-mark-line-right"/>
+				</span>
 			</div>
 		);
 	}
