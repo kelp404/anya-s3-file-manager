@@ -138,6 +138,17 @@ exports.downloadFiles = async (req, res) => {
 		const NOT_FORWARD_HEADERS = [
 			'Accept-Ranges',
 		];
+
+		if (req.headers['if-none-match']) {
+			// ETag
+			const objectHeaders = await s3.headObject(objects[0].path);
+
+			if (req.headers['if-none-match'] === objectHeaders.ETag) {
+				res.sendStatus(304);
+				return;
+			}
+		}
+
 		const stream = await s3.getObjectStream(objects[0].path);
 
 		res.set('Content-Disposition', contentDisposition(objects[0].basename));
