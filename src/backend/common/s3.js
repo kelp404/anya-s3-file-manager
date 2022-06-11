@@ -116,7 +116,7 @@ exports.putObject = (path, options) => s3
 	})
 	.promise();
 
-exports.getObjectStream = path => {
+exports.getObjectStream = (path, options) => {
 	const client = new S3Client({
 		region: S3.REGION,
 		credentials: {
@@ -126,6 +126,7 @@ exports.getObjectStream = path => {
 	});
 
 	return client.send(new GetObjectCommand({
+		...options,
 		Bucket: S3.BUCKET,
 		Key: path,
 	}));

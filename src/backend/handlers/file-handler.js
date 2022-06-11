@@ -135,10 +135,6 @@ exports.downloadFiles = async (req, res) => {
 
 	if (objects.length === 1 && objects[0].type === OBJECT_TYPE.FILE) {
 		// Forward S3 response.
-		const NOT_FORWARD_HEADERS = [
-			'Accept-Ranges',
-		];
-
 		if (req.headers['if-none-match']) {
 			// ETag
 			const objectHeaders = await s3.headObject(objects[0].path);
@@ -149,19 +145,15 @@ exports.downloadFiles = async (req, res) => {
 			}
 		}
 
-		const stream = await s3.getObjectStream(objects[0].path);
+		const stream = await s3.getObjectStream(objects[0].path, {
+			Range: req.headers.range,
+		});
 
+		res.status(stream.$metadata.httpStatusCode);
 		res.set('Content-Disposition', contentDisposition(objects[0].basename));
 
 		for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
-			const key = stream.Body.rawHeaders[index];
-			const value = stream.Body.rawHeaders[index + 1];
-
-			if (NOT_FORWARD_HEADERS.includes(key)) {
-				continue;
-			}
-
-			res.set(key, value);
+			res.set(stream.Body.rawHeaders[index], stream.Body.rawHeaders[index + 1]);
 		}
 
 		stream.Body.on('data', data => res.write(data));
