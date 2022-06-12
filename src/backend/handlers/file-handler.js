@@ -134,7 +134,8 @@ exports.downloadFiles = async (req, res) => {
 	}
 
 	if (objects.length === 1 && objects[0].type === OBJECT_TYPE.FILE) {
-		// Forward S3 response.
+		res.set('Content-Disposition', contentDisposition(objects[0].basename));
+
 		if (req.headers['if-none-match'] && !req.headers.range) {
 			// ETag
 			const objectHeaders = await s3.headObject(objects[0].path);
