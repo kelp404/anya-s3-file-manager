@@ -114,7 +114,17 @@ module.exports = class UploaderPage extends Base {
 				let isUploadSuccess;
 
 				try {
-					await api.file.uploadFile({file, dirname: params.dirname});
+					await api.file.uploadFile({
+						file,
+						dirname: params.dirname,
+						async onUploadProgress(progressEvent) {
+							await updateStateLimit(() =>
+								updateFileState(file.id, {
+									progress: parseInt((progressEvent.loaded / progressEvent.total) * 90, 10),
+								}),
+							);
+						},
+					});
 					isUploadSuccess = true;
 				} catch (_) {
 					isUploadSuccess = false;
@@ -122,7 +132,11 @@ module.exports = class UploaderPage extends Base {
 				}
 
 				await updateStateLimit(() =>
-					updateFileState(file.id, {isSuccess: isUploadSuccess, isFailed: !isUploadSuccess}),
+					updateFileState(file.id, {
+						progress: null,
+						isSuccess: isUploadSuccess,
+						isFailed: !isUploadSuccess,
+					}),
 				);
 			})));
 
@@ -182,13 +196,22 @@ module.exports = class UploaderPage extends Base {
 							{
 								files.map(file => (
 									<li key={file.id} className="list-group-item d-flex justify-content-between">
-										<div className="d-flex align-items-center">
-											<span>{file.name}</span>
-											<span className="ms-2">
+										<div className="d-flex align-items-center flex-grow-1 pe-2">
+											<div>{file.name}</div>
+											<div className="ms-2">
 												<small className="text-muted">{utils.formatSize(file.size)}</small>
-											</span>
-											{file.isSuccess && <span><SuccessIcon className="ms-2"/></span>}
-											{file.isFailed && <span><ErrorIcon className="ms-2"/></span>}
+											</div>
+											{
+												file.progress != null && (
+													<div className="progress ms-2" style={{height: '10px', width: '100px'}}>
+														<div
+															className="progress-bar progress-bar-striped progress-bar-animated"
+															style={{width: `${file.progress}%`}}/>
+													</div>
+												)
+											}
+											{file.isSuccess && <div><SuccessIcon className="ms-2"/></div>}
+											{file.isFailed && <div><ErrorIcon className="ms-2"/></div>}
 										</div>
 										<button
 											disabled={$isApiProcessing}

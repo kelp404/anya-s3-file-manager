@@ -4,7 +4,8 @@ const BASE_PATH = '/api';
 
 module.exports = {
 	file: {
-		uploadFile: ({dirname, file}) => sendRequest({
+		uploadFile: ({dirname, file, ...options}) => sendRequest({
+			...options,
 			method: 'post',
 			url: `${BASE_PATH}/files`,
 			params: {dirname},
