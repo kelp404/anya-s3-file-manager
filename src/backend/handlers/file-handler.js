@@ -135,7 +135,7 @@ exports.downloadFiles = async (req, res) => {
 
 	if (objects.length === 1 && objects[0].type === OBJECT_TYPE.FILE) {
 		// Forward S3 response.
-		if (req.headers['if-none-match']) {
+		if (req.headers['if-none-match'] && !req.headers.range) {
 			// ETag
 			const objectHeaders = await s3.headObject(objects[0].path);
 
@@ -145,19 +145,17 @@ exports.downloadFiles = async (req, res) => {
 			}
 		}
 
-		const stream = await s3.getObjectStream(objects[0].path, {
-			Range: req.headers.range,
-		});
+		const stream = s3
+			.getObject(objects[0].path, {
+				Range: req.headers.range,
+			})
+			.on('httpHeaders', (statusCode, headers) => {
+				res.status(statusCode);
+				res.set(headers);
+			})
+			.createReadStream();
 
-		res.status(stream.$metadata.httpStatusCode);
-		res.set('Content-Disposition', contentDisposition(objects[0].basename));
-
-		for (let index = 0; index < stream.Body.rawHeaders.length - 1; index += 2) {
-			res.set(stream.Body.rawHeaders[index], stream.Body.rawHeaders[index + 1]);
-		}
-
-		stream.Body.on('data', data => res.write(data));
-		stream.Body.on('end', () => res.end());
+		stream.pipe(res);
 	} else {
 		const files = [];
 		const limit = pLimit(1);
@@ -210,7 +208,7 @@ async function archiveFilesAndDownload({files, res}) {
 	await Promise.all(files.map(file => limit(async () => {
 		const filename = isAllFilesInSameFolder ? file.basename : file.path;
 		let filenameInZip = filename;
-		const stream = await s3.getObjectStream(file.path);
+		const stream = s3.getObject(file.path).createReadStream();
 
 		if (isFilenameExists(filename)) {
 			const extname = path.extname(filename);
@@ -232,9 +230,10 @@ async function archiveFilesAndDownload({files, res}) {
 			initFilenameIndex(filename);
 		}
 
-		archive.append(stream.Body, {name: filenameInZip});
-		return new Promise(resolve => {
-			stream.Body.on('end', resolve);
+		archive.append(stream, {name: filenameInZip});
+		return new Promise((resolve, reject) => {
+			stream.on('end', resolve);
+			stream.on('error', reject);
 		});
 	})));
 	archive.finalize();

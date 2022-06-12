@@ -1,5 +1,4 @@
 const AWS = require('aws-sdk');
-const {S3Client, GetObjectCommand} = require('@aws-sdk/client-s3');
 const config = require('config');
 const {Op} = require('sequelize');
 const ObjectModel = require('../models/data/object-model');
@@ -116,18 +115,12 @@ exports.putObject = (path, options) => s3
 	})
 	.promise();
 
-exports.getObjectStream = (path, options) => {
-	const client = new S3Client({
-		region: S3.REGION,
-		credentials: {
-			accessKeyId: S3.KEY,
-			secretAccessKey: S3.SECRET,
-		},
-	});
-
-	return client.send(new GetObjectCommand({
+/*
+	https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property
+ */
+exports.getObject = (path, options) => s3
+	.getObject({
 		...options,
 		Bucket: S3.BUCKET,
 		Key: path,
-	}));
-};
+	});
