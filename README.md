@@ -37,15 +37,14 @@ https://aws.amazon.com/s3/pricing/
 
 
 ## Create AWS S3 bucket
-anya-s3-file-manager uses Access Key to access your s3, so enable "Block all public access" is ok.  
+anya-s3-file-manager uses Access Key to access your S3 bucket, so enable "Block all public access" is ok.  
 https://aws.amazon.com/getting-started/hands-on/backup-files-to-amazon-s3/
 
 
 ## Create access key
 https://objectivefs.com/howto/how-to-get-amazon-s3-keys
 
-Ths policy example.  
-You can set ip whitelist at "aws:SourceIp".
+Ths policy example:
 ```
 {
     "Version": "2012-10-17",
@@ -70,3 +69,4 @@ You can set ip whitelist at "aws:SourceIp".
     ]
 }
 ```
+You can set ip whitelist at "aws:SourceIp".
