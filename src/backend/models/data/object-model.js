@@ -1,7 +1,10 @@
 const path = require('path');
 const lodash = require('lodash');
 const {DataTypes, NOW} = require('sequelize');
-const {OBJECT_TYPE} = require('../../../shared/constants');
+const {
+	OBJECT_TYPE,
+	STORAGE_CLASS,
+} = require('../../../shared/constants');
 const {connectDatabase} = require('../../common/database');
 
 const {sequelize} = connectDatabase();
@@ -46,13 +49,35 @@ const attributes = {
 	},
 	lastModified: {
 		type: DataTypes.DATE,
-		allowNull: false,
+		allowNull: true,
 		defaultValue: NOW,
 	},
 	size: {
 		type: DataTypes.BIGINT,
-		allowNull: false,
+		allowNull: true,
 		defaultValue: 0,
+	},
+	storageClass: {
+		type: DataTypes.TINYINT,
+		allowNull: true,
+		validate: {
+			isIn: [Object.values(STORAGE_CLASS)],
+		},
+		set(value) {
+			this.setDataValue('storageClass', STORAGE_CLASS[value] || null);
+		},
+		get() {
+			const storageClass = this.getDataValue('storageClass');
+
+			if (!storageClass) {
+				return storageClass;
+			}
+
+			const entry = Object.entries(STORAGE_CLASS)
+				.find(([_, value]) => value === storageClass);
+
+			return entry[0];
+		},
 	},
 };
 const options = {
@@ -75,6 +100,12 @@ const Model = sequelize.define('object', attributes, options);
 
 Model.prototype.toJSON = function () {
 	const result = lodash.cloneDeep(this.get({plain: false}));
+
+	if (this.type === OBJECT_TYPE.FOLDER) {
+		delete result.lastModified;
+		delete result.size;
+		delete result.storageClass;
+	}
 
 	return result;
 };

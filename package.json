@@ -13,7 +13,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "makemigration": "makemigration --name $npm_package_version --models-path src/backend/models/data && eslint migrations --fix || true",
     "runmigration:dev": "runmigration --models-path src/backend/models/data",
-    "runmigration": "cross-env NODE_ENV=staging runmigration --models-path dist/backend/models/data"
+    "runmigration": "runmigration --models-path dist/backend/models/data"
   },
   "repository": {
     "type": "git",

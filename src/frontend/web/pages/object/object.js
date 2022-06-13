@@ -3,6 +3,9 @@ const nprogress = require('nprogress');
 const PropTypes = require('prop-types');
 const React = require('react');
 const Modal = require('react-bootstrap/Modal').default;
+const {
+	STORAGE_CLASS,
+} = require('../../../../shared/constants');
 const Base = require('../../../core/pages/base');
 const api = require('../../../core/apis/web');
 const utils = require('../../../core/utils');
@@ -19,7 +22,9 @@ module.exports = class ObjectPage extends Base {
 			id: PropTypes.number.isRequired,
 			path: PropTypes.string.isRequired,
 			basename: PropTypes.string.isRequired,
-			size: PropTypes.number.isRequired,
+			lastModified: utils.generateDatePropTypes({isRequired: false}),
+			size: PropTypes.number,
+			storageClass: PropTypes.oneOf(Object.keys(STORAGE_CLASS)),
 			objectHeaders: PropTypes.object.isRequired,
 		}).isRequired,
 	};
@@ -118,14 +123,30 @@ module.exports = class ObjectPage extends Base {
 							<strong className="d-block text-secondary mb-0">{_('Path')}</strong>
 							<span>{object.path}</span>
 						</div>
-						<div className="col-12 col-md-6 mb-2">
-							<strong className="d-block text-secondary mb-0">{_('Last modified')}</strong>
-							<span>{utils.formatDate(object.lastModified)}</span>
-						</div>
-						<div className="col-12 col-md-6 mb-2">
-							<strong className="d-block text-secondary mb-0">{_('Size')}</strong>
-							<span>{utils.formatSize(object.size)}</span>
-						</div>
+						{
+							object.lastModified && (
+								<div className="col-12 col-md-6 mb-2">
+									<strong className="d-block text-secondary mb-0">{_('Last modified')}</strong>
+									<span>{utils.formatDate(object.lastModified)}</span>
+								</div>
+							)
+						}
+						{
+							object.size != null && (
+								<div className="col-12 col-md-6 mb-2">
+									<strong className="d-block text-secondary mb-0">{_('Size')}</strong>
+									<span>{utils.formatSize(object.size)}</span>
+								</div>
+							)
+						}
+						{
+							object.storageClass && (
+								<div className="col-12 col-md-6 mb-2">
+									<strong className="d-block text-secondary mb-0">{_('Storage class')}</strong>
+									<span>{object.storageClass}</span>
+								</div>
+							)
+						}
 						<div className="col-12">
 							<strong className="d-block text-secondary mb-0">{_('Object headers')}</strong>
 							<pre>

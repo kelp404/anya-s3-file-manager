@@ -20,11 +20,12 @@ exports.syncObjectsFromS3 = async () => {
 		const result = await s3
 			.listObjectsV2({Bucket: S3.BUCKET, ContinuationToken: continuationToken})
 			.promise();
-		const convertS3Object = ({Key, Size, LastModified}) => ({
+		const convertS3Object = ({Key, Size, LastModified, StorageClass}) => ({
 			type: Key.slice(-1) === '/' ? OBJECT_TYPE.FOLDER : OBJECT_TYPE.FILE,
 			path: Key,
 			lastModified: LastModified,
 			size: Size,
+			storageClass: StorageClass,
 		});
 
 		await Promise.all([
@@ -54,7 +55,7 @@ exports.syncObjectsFromS3 = async () => {
 						pathSet.add(object.path);
 						return true;
 					}),
-				{updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt']},
+				{updateOnDuplicate: ['type', 'lastModified', 'size', 'updatedAt', 'storageClass']},
 			),
 			result.NextContinuationToken ? scanObjects(result.NextContinuationToken) : null,
 		]);

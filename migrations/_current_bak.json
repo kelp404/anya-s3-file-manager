@@ -39,7 +39,7 @@
                     "seqType": "Sequelize.CITEXT"
                 },
                 "lastModified": {
-                    "allowNull": true,
+                    "allowNull": false,
                     "defaultValue": {
                         "internal": true,
                         "value": "Sequelize.NOW"
@@ -48,32 +48,12 @@
                     "seqType": "Sequelize.DATE"
                 },
                 "size": {
-                    "allowNull": true,
+                    "allowNull": false,
                     "defaultValue": {
                         "value": 0
                     },
                     "field": "size",
                     "seqType": "Sequelize.BIGINT"
-                },
-                "storageClass": {
-                    "allowNull": true,
-                    "validate": {
-                        "isIn": [
-                            [
-                                1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7,
-                                8,
-                                9
-                            ]
-                        ]
-                    },
-                    "field": "storageClass",
-                    "seqType": "Sequelize.TINYINT"
                 },
                 "createdAt": {
                     "allowNull": false,
@@ -128,5 +108,5 @@
             }
         }
     },
-    "revision": 2
+    "revision": 1
 }

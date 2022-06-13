@@ -6,6 +6,7 @@ const {Link, RouterView, getRouter} = require('capybara-router');
 const InfiniteScroll = require('@kelp404/react-infinite-scroller');
 const {
 	OBJECT_TYPE,
+	STORAGE_CLASS,
 } = require('../../../../shared/constants');
 const api = require('../../../core/apis/web');
 const Loading = require('../../../core/components/loading');
@@ -34,6 +35,7 @@ module.exports = class ObjectsPage extends Base {
 				basename: PropTypes.string.isRequired,
 				lastModified: utils.generateDatePropTypes({isRequired: false}),
 				size: PropTypes.number,
+				storageClass: PropTypes.oneOf(Object.keys(STORAGE_CLASS)),
 			}).isRequired).isRequired,
 		}),
 	};
@@ -248,6 +250,9 @@ module.exports = class ObjectsPage extends Base {
 			<div className="flex-grow-1 px-1 text-truncate">
 				<strong>{_('Name')}</strong>
 			</div>
+			<div className="d-none d-lg-block text-truncate" style={{minWidth: '200px'}}>
+				<strong>{_('Storage class')}</strong>
+			</div>
 			<div className="px-1 text-truncate" style={{minWidth: '270px'}}>
 				<strong>{_('Last modified')}</strong>
 			</div>
@@ -311,11 +316,14 @@ module.exports = class ObjectsPage extends Base {
 							: <Link to={generateFolderLinkToParams(object)}>{name}</Link>
 					}
 				</div>
+				<div className="d-none d-lg-block text-truncate" style={{minWidth: '200px'}}>
+					{object.storageClass || '-'}
+				</div>
 				<pre className="px-1 m-0 text-truncate" style={{minWidth: '270px'}}>
-					{object.type === OBJECT_TYPE.FILE ? utils.formatDate(object.lastModified) : '-'}
+					{object.lastModified ? utils.formatDate(object.lastModified) : '-'}
 				</pre>
 				<pre className="ps-1 m-0 text-end" style={{minWidth: '86px'}}>
-					{object.type === OBJECT_TYPE.FILE ? utils.formatSize(object.size) : '-'}
+					{object.size == null ? '-' : utils.formatSize(object.size)}
 				</pre>
 			</li>
 		);
