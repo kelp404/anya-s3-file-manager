@@ -8,6 +8,7 @@ const {Op, UniqueConstraintError} = require('sequelize');
 const {
 	OBJECT_TYPE,
 	FRONTEND_OPERATION_CODE,
+	STORAGE_CLASS,
 } = require('../../shared/constants');
 const utils = require('../common/utils');
 const s3 = require('../common/s3');
@@ -63,6 +64,7 @@ exports.uploadFile = async (req, res) => {
 				object = new ObjectModel({
 					type: OBJECT_TYPE.FILE,
 					path: dirname ? `${dirname}/${filename}` : filename,
+					storageClass: STORAGE_CLASS.STANDARD,
 				});
 
 				try {

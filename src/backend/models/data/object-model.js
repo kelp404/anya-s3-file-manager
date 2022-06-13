@@ -64,6 +64,11 @@ const attributes = {
 			isIn: [Object.values(STORAGE_CLASS)],
 		},
 		set(value) {
+			if (typeof value === 'number' && Object.values(STORAGE_CLASS).includes(value)) {
+				this.setDataValue('storageClass', value);
+				return;
+			}
+
 			this.setDataValue('storageClass', STORAGE_CLASS[value] || null);
 		},
 		get() {
