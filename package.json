@@ -1,6 +1,6 @@
 {
   "name": "anya-s3-file-manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An AWS S3 file manager.",
   "main": "index.js",
   "scripts": {
