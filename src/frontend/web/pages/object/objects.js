@@ -378,7 +378,7 @@ module.exports = class ObjectsPage extends Base {
 							</form>
 						</div>
 
-						<div className="card">
+						<div className="card shadow-sm">
 							<div className="card-header d-flex justify-content-between">
 								<div>
 									<button

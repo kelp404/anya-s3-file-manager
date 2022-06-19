@@ -177,7 +177,7 @@ module.exports = class UploaderPage extends Base {
 
 				<Modal.Body>
 					<h5>{_('Upload files to /{0}.', [params.dirname || ''])}</h5>
-					<div className="card">
+					<div className="card shadow-sm">
 						<div className="card-header d-flex justify-content-between">
 							<div>{_('Files')}</div>
 							<label
