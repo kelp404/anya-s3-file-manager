@@ -46,28 +46,26 @@ module.exports = class ObjectsPage extends Base {
 		const folders = props.params.dirname?.split('/') || [];
 
 		this.myRoute = getRouter().findRouteByName('web.objects');
-		this.state = {
-			keyword: props.params.keyword || '',
-			checked: Object.fromEntries(props.objects.items.map(({id}) => [id, false])),
-			objectTable: {...props.objects, items: [null, ...props.objects.items]},
-			breadcrumb: {
-				items: [
-					{
-						id: Math.random().toString(36),
-						title: S3.BUCKET,
-						urlParams: {
-							dirname: null,
-						},
+		this.state.keyword = props.params.keyword || '';
+		this.state.checked = Object.fromEntries(props.objects.items.map(({id}) => [id, false]));
+		this.state.objectTable = {...props.objects, items: [null, ...props.objects.items]};
+		this.state.breadcrumb = {
+			items: [
+				{
+					id: Math.random().toString(36),
+					title: S3.BUCKET,
+					urlParams: {
+						dirname: null,
 					},
-					...folders.map((folder, index) => ({
-						id: Math.random().toString(36),
-						title: folder,
-						urlParams: {
-							dirname: folders.slice(0, index + 1).join('/'),
-						},
-					})),
-				],
-			},
+				},
+				...folders.map((folder, index) => ({
+					id: Math.random().toString(36),
+					title: folder,
+					urlParams: {
+						dirname: folders.slice(0, index + 1).join('/'),
+					},
+				})),
+			],
 		};
 	}
 
