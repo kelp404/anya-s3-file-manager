@@ -67,7 +67,7 @@
     "css-minimizer-webpack-plugin": "4.0.0",
     "dayjs": "1.11.3",
     "eslint": "8.22.0",
-    "eslint-config-xo": "0.40.0",
+    "eslint-config-xo": "0.41.0",
     "eslint-config-xo-react": "0.27.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-react": "7.30.1",
