@@ -38,7 +38,7 @@
     "cross-env": "7.0.3",
     "ejs": "3.1.8",
     "express": "4.18.1",
-    "fastest-validator": "1.12.0",
+    "fastest-validator": "1.16.0",
     "lodash": "4.17.21",
     "on-finished": "2.4.1",
     "p-limit": "3.1.0",
