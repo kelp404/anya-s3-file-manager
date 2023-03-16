@@ -89,7 +89,7 @@
     "sass": "1.52.3",
     "sass-loader": "13.0.0",
     "sweetalert2": "11.4.17",
-    "webpack": "5.73.0",
+    "webpack": "5.76.2",
     "webpack-cli": "4.10.0",
     "webpack-dev-server": "4.9.2"
   }
